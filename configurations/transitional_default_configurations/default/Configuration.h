@@ -458,8 +458,10 @@
 //#define DEBUG_LEVELING_FEATURE
 
 // By default, perform the Z-Probe Repeatability test if Auto Bed Leveling is Enabled.
-#ifndef Z_MIN_PROBE_REPEATABILITY_TEST
-  #define Z_MIN_PROBE_REPEATABILITY_TEST
+#if ENABLED(AUTO_BED_LEVELING_FEATURE)
+  #ifndef Z_MIN_PROBE_REPEATABILITY_TEST
+    #define Z_MIN_PROBE_REPEATABILITY_TEST
+  #endif
 #endif
 #if ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST)
   #define USE_PROBE

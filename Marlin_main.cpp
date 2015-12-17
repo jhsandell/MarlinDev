@@ -127,6 +127,7 @@
  *        The '#' is necessary when calling from within sd files, as it stops buffer prereading
  * M33  - Get the longname version of a path
  * M42  - Change pin status via gcode Use M42 Px Sy to set pin x to value y, when omitting Px the onboard led will be used.
+ * M48  - Measure Z_Probe repeatability. M48 [P # of points] [X position] [Y position] [V_erboseness #] [E_ngage Probe] [L # of legs of travel]
  * M80  - Turn on Power Supply
  * M81  - Turn off Power Supply
  * M82  - Set E codes absolute (default)
@@ -3987,6 +3988,12 @@ void process_next_command() {
       case 45: //M45 -Check pin status via gcode
         gcode_M45();
         break;
+
+      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST)
+        case 48: // M48 Z probe repeatability
+          gcode_M48();
+          break;
+      #endif // AUTO_BED_LEVELING_FEATURE && Z_MIN_PROBE_REPEATABILITY_TEST
 
       #if ENABLED(M100_FREE_MEMORY_WATCHER)
         case 100:
