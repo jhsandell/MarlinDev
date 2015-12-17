@@ -34,6 +34,7 @@
   #include <SPI.h>
 #endif
 #include "host_interface/host_io.h"
+#include "probe_management/probe_management.h"
 
 //===========================================================================
 //============================= public variables ============================
