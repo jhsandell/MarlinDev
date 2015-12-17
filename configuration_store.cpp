@@ -95,6 +95,7 @@
 #include "messages/language.h"
 #include "planner.h"
 #include "temperature.h"
+#include "thermal/preheat.h"
 #include "ultralcd.h"
 
 #if ENABLED(MESH_BED_LEVELING)

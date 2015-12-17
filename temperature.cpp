@@ -1322,23 +1322,29 @@ ISR(TIMER0_COMPB_vect) {
       #endif
     }
 
-    if (soft_pwm_0 < pwm_count) WRITE_HEATER_0(0);
+    if (soft_pwm_0 < pwm_count)
+      WRITE_HEATER_0(0);
     #if EXTRUDERS > 1
-      if (soft_pwm_1 < pwm_count) WRITE_HEATER_1(0);
-      #if EXTRUDERS > 2
-        if (soft_pwm_2 < pwm_count) WRITE_HEATER_2(0);
-        #if EXTRUDERS > 3
-          if (soft_pwm_3 < pwm_count) WRITE_HEATER_3(0);
-        #endif
-      #endif
+      if (soft_pwm_1 < pwm_count)
+        WRITE_HEATER_1(0);
+    #endif
+    #if EXTRUDERS > 2
+      if (soft_pwm_2 < pwm_count)
+        WRITE_HEATER_2(0);
+    #endif
+    #if EXTRUDERS > 3
+      if (soft_pwm_3 < pwm_count)
+        WRITE_HEATER_3(0);
     #endif
 
     #if HAS_HEATER_BED
-      if (soft_pwm_BED < pwm_count) WRITE_HEATER_BED(0);
+      if (soft_pwm_BED < pwm_count)
+        WRITE_HEATER_BED(0);
     #endif
 
     #if ENABLED(FAN_SOFT_PWM)
-      if (soft_pwm_fan < pwm_count) WRITE_FAN(0);
+      if (soft_pwm_fan < pwm_count)
+        WRITE_FAN(0);
     #endif
 
     pwm_count += BIT(SOFT_PWM_SCALE);
@@ -1435,12 +1441,12 @@ ISR(TIMER0_COMPB_vect) {
       if (state_timer_heater_0 > 0) state_timer_heater_0--;
       #if EXTRUDERS > 1    // EXTRUDER 1
         if (state_timer_heater_1 > 0) state_timer_heater_1--;
-        #if EXTRUDERS > 2    // EXTRUDER 2
-          if (state_timer_heater_2 > 0) state_timer_heater_2--;
-          #if EXTRUDERS > 3    // EXTRUDER 3
-            if (state_timer_heater_3 > 0) state_timer_heater_3--;
-          #endif
-        #endif
+      #endif
+      #if EXTRUDERS > 2    // EXTRUDER 2
+        if (state_timer_heater_2 > 0) state_timer_heater_2--;
+      #endif
+      #if EXTRUDERS > 3    // EXTRUDER 3
+        if (state_timer_heater_3 > 0) state_timer_heater_3--;
       #endif
       #if HAS_HEATER_BED
         if (state_timer_heater_BED > 0) state_timer_heater_BED--;

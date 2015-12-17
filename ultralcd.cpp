@@ -13,14 +13,6 @@ int8_t encoderDiff; // updated from interrupt context and added to encoderPositi
 bool encoderRateMultiplierEnabled;
 int32_t lastEncoderMovementMillis;
 
-int plaPreheatHotendTemp;
-int plaPreheatHPBTemp;
-int plaPreheatFanSpeed;
-
-int absPreheatHotendTemp;
-int absPreheatHPBTemp;
-int absPreheatFanSpeed;
-
 #if ENABLED(FILAMENT_LCD_DISPLAY)
   millis_t previous_lcd_status_ms = 0;
 #endif
