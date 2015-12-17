@@ -5,3 +5,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <LiquidTWI2.h>
 #include <Wire.h>
+
+#include "HoneyPot.h"
+#include "CheckForConfigurationRequirements.h"
+#include "CheckForDeprecatedConfigurationEntries.h"

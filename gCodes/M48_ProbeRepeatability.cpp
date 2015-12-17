@@ -14,7 +14,7 @@
 
 #if ENABLED(USE_PROBE)
 
-// This is redundant since the SanityCheck.h already checks for a valid Z_MIN_PROBE_PIN, but here for clarity.
+// This is redundant since the Sanity Check already checks for a valid Z_MIN_PROBE_PIN, but here for clarity.
 #if ENABLED(Z_MIN_PROBE_ENDSTOP)
   #if !HAS_Z_PROBE
     #error You must define Z_MIN_PROBE_PIN to enable Z probe repeatability calculation.

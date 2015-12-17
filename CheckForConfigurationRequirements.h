@@ -1,10 +1,10 @@
 /**
- * SanityCheck.h
+ * CheckForConfigurationRequirements.h
  *
  * Test configuration values for errors at compile-time.
  */
-#ifndef SANITYCHECK_H
-#define SANITYCHECK_H
+
+#include "MarlinFirmware.h"
 
 /**
  * Dual Stepper Drivers
@@ -167,7 +167,7 @@
    * Check if Probe_Offset * Grid Points is greater than Probing Range
    */
   #if ENABLED(AUTO_BED_LEVELING_GRID)
-    #ifndef DELTA_PROBABLE_RADIUS
+    #ifndef DELTA_PROBEABLE_RADIUS
       // Be sure points are in the right order
       #if LEFT_PROBE_BED_POSITION > RIGHT_PROBE_BED_POSITION
         #error LEFT_PROBE_BED_POSITION must be less than RIGHT_PROBE_BED_POSITION.
@@ -229,7 +229,7 @@
     #endif
 
     #if ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST)
-      #error Z_MIN_PROBE_REPEATABILITY_TEST is not supported with DELTA yet.
+//      #error Z_MIN_PROBE_REPEATABILITY_TEST is not supported with DELTA yet.   // Bypass for Roxy
     #endif
 
   #endif
@@ -340,36 +340,3 @@
 #elif TEMP_SENSOR_0 == 0
   #error TEMP_SENSOR_0 is required.
 #endif
-
-/**
- * Warnings for old configurations
- */
-#if WATCH_TEMP_PERIOD > 500
-  #error WATCH_TEMP_PERIOD now uses seconds instead of milliseconds.
-#elif DISABLED(THERMAL_PROTECTION_HOTENDS) && (defined(WATCH_TEMP_PERIOD) || defined(THERMAL_PROTECTION_PERIOD))
-  #error Thermal Runaway Protection for hotends is now enabled with THERMAL_PROTECTION_HOTENDS.
-#elif DISABLED(THERMAL_PROTECTION_BED) && defined(THERMAL_PROTECTION_BED_PERIOD)
-  #error Thermal Runaway Protection for the bed is now enabled with THERMAL_PROTECTION_BED.
-#elif ENABLED(COREXZ) && ENABLED(Z_LATE_ENABLE)
-  #error "Z_LATE_ENABLE can't be used with COREXZ."
-#elif defined(X_HOME_RETRACT_MM)
-  #error [XYZ]_HOME_RETRACT_MM settings have been renamed [XYZ]_HOME_BUMP_MM.
-#elif defined(PROBE_SERVO_DEACTIVATION_DELAY)
-  #error PROBE_SERVO_DEACTIVATION_DELAY has been replaced with DEACTIVATE_SERVOS_AFTER_MOVE and SERVO_DEACTIVATION_DELAY.
-#elif defined(BEEPER)
-  #error BEEPER is now BEEPER_PIN. Please update your pins definitions.
-#elif defined(SDCARDDETECT)
-  #error SDCARDDETECT is now SD_DETECT_PIN. Please update your pins definitions.
-#elif defined(SDCARDDETECTINVERTED)
-  #error SDCARDDETECTINVERTED is now SD_DETECT_INVERTED. Please update your configuration.
-#elif defined(BTENABLED)
-  #error BTENABLED is now BLUETOOTH. Please update your configuration.
-#elif defined(CUSTOM_MENDEL_NAME)
-  #error CUSTOM_MENDEL_NAME is now CUSTOM_MACHINE_NAME. Please update your configuration.
-#elif defined(HAS_AUTOMATIC_VERSIONING)
-  #error HAS_AUTOMATIC_VERSIONING deprecated - use USE_AUTOMATIC_VERSIONING instead
-#elif defined(ENABLE_AUTO_BED_LEVELING)
-  #error ENABLE_AUTO_BED_LEVELING deprecated - use AUTO_BED_LEVELING_FEATURE instead
-#endif
-
-#endif //SANITYCHECK_H

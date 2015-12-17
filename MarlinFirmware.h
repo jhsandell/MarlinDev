@@ -40,7 +40,6 @@
 
 #include "pins/pins.h"
 #include "Conditionals.h"
-#include "SanityCheck.h"
 
 #include "Arduino.h"
 
