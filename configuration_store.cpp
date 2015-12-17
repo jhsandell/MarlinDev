@@ -14,10 +14,10 @@
  *
  */
 
-#define EEPROM_VERSION "V21"
+#define EEPROM_VERSION "V23"
 
 /**
- * V19 EEPROM Layout:
+ * V22 EEPROM Layout:
  *
  *  ver
  *  M92 XYZE  axis_steps_per_unit (x4)
@@ -46,6 +46,12 @@
  *  M665 R    delta_radius
  *  M665 L    delta_diagonal_rod
  *  M665 S    delta_segments_per_second
+ *  M665 A    delta_diagonal_rod_trim_tower_1
+ *  M665 B    delta_diagonal_rod_trim_tower_2
+ *  M665 C    delta_diagonal_rod_trim_tower_3
+ *  M665 I    delta_radius_trim_tower_1
+ *  M665 J    delta_radius_trim_tower_2
+ *  M665 K    delta_radius_trim_tower_3
  *
  * ULTIPANEL:
  *  M145 S0 H plaPreheatHotendTemp
@@ -92,21 +98,25 @@
 #include "MarlinFirmware.h"
 #include "configuration_store.h"
 #include "host_interface/host_io.h"
+#include "kinematics/delta/coefficients.h"
 #include "messages/language.h"
 #include "planner.h"
 #include "temperature.h"
 #include "thermal/preheat.h"
 #include "ultralcd.h"
+#include "unit_conversion.h"
 
 #if ENABLED(MESH_BED_LEVELING)
   #include "mesh_bed_leveling.h"
 #endif
 
+#include <avr/eeprom.h>
+
 void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size) {
   uint8_t c;
   while (size--) {
-    eeprom_write_byte((unsigned char*)pos, *value);
-    c = eeprom_read_byte((unsigned char*)pos);
+    eeprom_write_byte((uint8_t *)pos, *value);
+    c = eeprom_read_byte((uint8_t *)pos);
     if (c != *value) {
       SERIAL_ECHO_START;
       SERIAL_ECHOLNPGM(MSG_ERR_EEPROM_WRITE);
@@ -117,7 +127,7 @@ void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size) {
 }
 void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size) {
   do {
-    *value = eeprom_read_byte((unsigned char*)pos);
+    *value = eeprom_read_byte((uint8_t *)pos);
     pos++;
     value++;
   } while (--size);
@@ -184,6 +194,12 @@ void Config_StoreSettings()  {
     EEPROM_WRITE_VAR(i, delta_radius);              // 1 float
     EEPROM_WRITE_VAR(i, delta_diagonal_rod);        // 1 float
     EEPROM_WRITE_VAR(i, delta_segments_per_second); // 1 float
+    EEPROM_WRITE_VAR(i, delta_diagonal_rod_trim_tower_1); // 1 float
+    EEPROM_WRITE_VAR(i, delta_diagonal_rod_trim_tower_2); // 1 float
+    EEPROM_WRITE_VAR(i, delta_diagonal_rod_trim_tower_3); // 1 float
+    EEPROM_WRITE_VAR(i, delta_radius_trim_tower_1); // 1 float
+    EEPROM_WRITE_VAR(i, delta_radius_trim_tower_2); // 1 float
+    EEPROM_WRITE_VAR(i, delta_radius_trim_tower_3); // 1 float
   #elif ENABLED(Z_DUAL_ENDSTOPS)
     EEPROM_WRITE_VAR(i, z_endstop_adj);            // 1 floats
     dummy = 0.0f;
@@ -357,6 +373,12 @@ void Config_RetrieveSettings() {
       EEPROM_READ_VAR(i, delta_radius);               // 1 float
       EEPROM_READ_VAR(i, delta_diagonal_rod);         // 1 float
       EEPROM_READ_VAR(i, delta_segments_per_second);  // 1 float
+      EEPROM_READ_VAR(i, delta_diagonal_rod_trim_tower_1); // 1 float
+      EEPROM_READ_VAR(i, delta_diagonal_rod_trim_tower_2); // 1 float
+      EEPROM_READ_VAR(i, delta_diagonal_rod_trim_tower_3); // 1 float
+      EEPROM_READ_VAR(i, delta_radius_trim_tower_1); // 1 float
+      EEPROM_READ_VAR(i, delta_radius_trim_tower_2); // 1 float
+      EEPROM_READ_VAR(i, delta_radius_trim_tower_3); // 1 float
     #elif ENABLED(Z_DUAL_ENDSTOPS)
       EEPROM_READ_VAR(i, z_endstop_adj);
       dummy = 0.0f;
@@ -520,6 +542,15 @@ void Config_ResetDefault() {
     delta_radius =  DELTA_RADIUS;
     delta_diagonal_rod =  DELTA_DIAGONAL_ROD;
     delta_segments_per_second =  DELTA_SEGMENTS_PER_SECOND;
+
+    delta_diagonal_rod_trim_tower_1 = DELTA_DIAGONAL_ROD_TRIM_TOWER_1;
+    delta_diagonal_rod_trim_tower_2 = DELTA_DIAGONAL_ROD_TRIM_TOWER_2;
+    delta_diagonal_rod_trim_tower_3 = DELTA_DIAGONAL_ROD_TRIM_TOWER_3;
+
+    delta_radius_trim_tower_1 = DELTA_RADIUS_TRIM_TOWER_1;
+    delta_radius_trim_tower_2 = DELTA_RADIUS_TRIM_TOWER_2;
+    delta_radius_trim_tower_3 = DELTA_RADIUS_TRIM_TOWER_3;
+
     recalc_delta_settings(delta_radius, delta_diagonal_rod);
   #elif ENABLED(Z_DUAL_ENDSTOPS)
     z_endstop_adj = 0;
@@ -715,7 +746,14 @@ void Config_PrintSettings(bool forReplay) {
     SERIAL_ECHOPAIR("  M665 L", delta_diagonal_rod);
     SERIAL_ECHOPAIR(" R", delta_radius);
     SERIAL_ECHOPAIR(" S", delta_segments_per_second);
+    SERIAL_ECHOPAIR(" A", delta_diagonal_rod_trim_tower_1);
+    SERIAL_ECHOPAIR(" B", delta_diagonal_rod_trim_tower_2);
+    SERIAL_ECHOPAIR(" C", delta_diagonal_rod_trim_tower_3);
+    SERIAL_ECHOPAIR(" I", delta_radius_trim_tower_1 );
+    SERIAL_ECHOPAIR(" J", delta_radius_trim_tower_2 );
+    SERIAL_ECHOPAIR(" K", delta_radius_trim_tower_3 );
     SERIAL_EOL;
+
   #elif ENABLED(Z_DUAL_ENDSTOPS)
     CONFIG_ECHO_START;
     if (!forReplay) {

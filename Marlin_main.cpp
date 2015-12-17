@@ -215,7 +215,7 @@
  * M503 - Print the current settings (from memory not from EEPROM). Use S0 to leave off headings.
  * M540 - Use S[0|1] to enable or disable the stop SD card print on endstop hit (requires ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED)
  * M600 - Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]
- * M665 - Set delta configurations: L<diagonal rod> R<delta radius> S<segments/s>
+ * M665 - Set delta configurations: L<diagonal rod> R<delta radius> S<segments/s> A<alpha diagonal_rod_trim> B<beta diagonal_rod_trim> C<gamma diagonal rod trim>
  * M666 - Set delta endstop adjustment
  * M605 - Set dual x-carriage movement mode: S<mode> [ X<duplication x-offset> R<duplication temp offset> ]
  * M907 - Set digital trimpot motor current using axis codes.
@@ -256,7 +256,7 @@ uint8_t marlin_debug_flags = DEBUG_INFO | DEBUG_ERRORS ; // | DEBUG_LEVELING ;
 
 float feedrate = 1500.0, saved_feedrate;
 float current_position[NUM_AXIS] = { 0.0 };
-static float destination[NUM_AXIS] = { 0.0 };
+float destination[NUM_AXIS] = { 0.0 };
 bool axis_known_position[3] = { false };
 
 static long gcode_N, gcode_LastN, Stopped_gcode_LastN = 0;
@@ -386,6 +386,9 @@ bool target_direction;
   float delta_diagonal_rod_trim_tower_1 = DELTA_DIAGONAL_ROD_TRIM_TOWER_1;
   float delta_diagonal_rod_trim_tower_2 = DELTA_DIAGONAL_ROD_TRIM_TOWER_2;
   float delta_diagonal_rod_trim_tower_3 = DELTA_DIAGONAL_ROD_TRIM_TOWER_3;
+  float delta_radius_trim_tower_1 = DELTA_RADIUS_TRIM_TOWER_1;
+  float delta_radius_trim_tower_2 = DELTA_RADIUS_TRIM_TOWER_2;
+  float delta_radius_trim_tower_3 = DELTA_RADIUS_TRIM_TOWER_3;
   float delta_diagonal_rod_2_tower_1 = sq(delta_diagonal_rod + delta_diagonal_rod_trim_tower_1);
   float delta_diagonal_rod_2_tower_2 = sq(delta_diagonal_rod + delta_diagonal_rod_trim_tower_2);
   float delta_diagonal_rod_2_tower_3 = sq(delta_diagonal_rod + delta_diagonal_rod_trim_tower_3);
@@ -2406,6 +2409,9 @@ inline void gcode_M206() {
    *    A = Alpha (Tower 1) diagonal rod trim
    *    B = Beta (Tower 2) diagonal rod trim
    *    C = Gamma (Tower 3) diagonal rod trim
+   *    I = Alpha (Tower 1) radius trim
+   *    J = Beta (Tower 2) radius trim
+   *    K = Gamma (Tower 3) radius trim
    */
   inline void gcode_M665() {
     if (code_seen('L')) delta_diagonal_rod = code_value();
@@ -2414,6 +2420,9 @@ inline void gcode_M206() {
     if (code_seen('A')) delta_diagonal_rod_trim_tower_1 = code_value();
     if (code_seen('B')) delta_diagonal_rod_trim_tower_2 = code_value();
     if (code_seen('C')) delta_diagonal_rod_trim_tower_3 = code_value();
+    if (code_seen('I')) delta_radius_trim_tower_1 = code_value();
+    if (code_seen('J')) delta_radius_trim_tower_2 = code_value();
+    if (code_seen('K')) delta_radius_trim_tower_3 = code_value();
     recalc_delta_settings(delta_radius, delta_diagonal_rod);
   }
   /**
@@ -4182,12 +4191,12 @@ void clamp_to_software_endstops(float target[3]) {
 #if ENABLED(DELTA)
 
   void recalc_delta_settings(float radius, float diagonal_rod) {
-    delta_tower1_x = -SIN_60 * (radius + DELTA_RADIUS_TRIM_TOWER_1);  // front left tower
-    delta_tower1_y = -COS_60 * (radius + DELTA_RADIUS_TRIM_TOWER_1);
-    delta_tower2_x =  SIN_60 * (radius + DELTA_RADIUS_TRIM_TOWER_2);  // front right tower
-    delta_tower2_y = -COS_60 * (radius + DELTA_RADIUS_TRIM_TOWER_2);
+    delta_tower1_x = -SIN_60 * (radius + delta_radius_trim_tower_1);  // front left tower
+    delta_tower1_y = -COS_60 * (radius + delta_radius_trim_tower_1);
+    delta_tower2_x =  SIN_60 * (radius + delta_radius_trim_tower_2);  // front right tower
+    delta_tower2_y = -COS_60 * (radius + delta_radius_trim_tower_2);
     delta_tower3_x = 0.0;                                             // back middle tower
-    delta_tower3_y = (radius + DELTA_RADIUS_TRIM_TOWER_3);
+    delta_tower3_y = (radius + delta_radius_trim_tower_3);
     delta_diagonal_rod_2_tower_1 = sq(delta_diagonal_rod + delta_diagonal_rod_trim_tower_1);
     delta_diagonal_rod_2_tower_2 = sq(delta_diagonal_rod + delta_diagonal_rod_trim_tower_2);
     delta_diagonal_rod_2_tower_3 = sq(delta_diagonal_rod + delta_diagonal_rod_trim_tower_3);

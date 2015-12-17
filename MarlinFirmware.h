@@ -24,7 +24,6 @@
 
 #include <util/delay.h>
 #include <avr/pgmspace.h>
-#include <avr/eeprom.h>
 #include <avr/interrupt.h>
 
 #include "fastio.h"
@@ -40,21 +39,6 @@
 #endif
 
 #include "pins/pins.h"
-
-#if ENABLED(DELTA)
-  extern float delta_diagonal_rod_trim_tower_1;
-  extern float delta_diagonal_rod_trim_tower_2;
-  extern float delta_diagonal_rod_trim_tower_3;
-
-  extern float delta_radius_trim_tower_1;
-  extern float delta_radius_trim_tower_2;
-  extern float delta_radius_trim_tower_3;
-#endif
-
-#if ENABLED(AUTO_BED_LEVELING_FEATURE)
-  extern bool z_probe_is_stowed;
-#endif
-
 #include "Conditionals.h"
 #include "SanityCheck.h"
 
@@ -257,15 +241,6 @@ extern bool axis_known_position[3]; // axis[n].is_known
   #ifndef DELTA_DIAGONAL_ROD_TRIM_TOWER_3
     #define DELTA_DIAGONAL_ROD_TRIM_TOWER_3 0.0
   #endif
-
-  extern float delta_diagonal_rod_trim_tower_1;
-  extern float delta_diagonal_rod_trim_tower_2;
-  extern float delta_diagonal_rod_trim_tower_3;
-
-  extern float delta_radius_trim_tower_1;
-  extern float delta_radius_trim_tower_2;
-  extern float delta_radius_trim_tower_3;
-
   extern float delta_segments_per_second;
   void calculate_delta(float cartesian[3]);
   void recalc_delta_settings(float radius, float diagonal_rod);
@@ -285,7 +260,6 @@ extern bool axis_known_position[3]; // axis[n].is_known
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
   extern float zprobe_zoffset;
-  extern bool z_probe_is_stowed;
 #endif
 
 #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
