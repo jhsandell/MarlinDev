@@ -46,7 +46,7 @@
 #include "temperature.h"
 #include "cardreader.h"
 #include "configuration_store.h"
-#include "language.h"
+#include "messages/language.h"
 #include "pins_arduino.h"
 #include "math.h"
 #include "buzzer.h"

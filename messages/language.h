@@ -204,6 +204,6 @@
 #endif
 
 #include LANGUAGE_INCLUDE
-#include "language_en.h"
+#include "messages/language_en.h"
 
 #endif //__LANGUAGE_H

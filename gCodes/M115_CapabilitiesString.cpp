@@ -5,7 +5,7 @@
 #include "Version.h"
 #include "host_interface/host_protocol.h"
 #include "host_interface/host_io.h"
-#include "language.h"
+#include "messages/language.h"
 
 #define MSG_M115_REPORT   \
   "FIRMWARE_NAME:Marlin " DETAILED_BUILD_VERSION \

@@ -1,6 +1,7 @@
+#include "MarlinFirmware.h"
 #include "ultralcd.h"
 #if ENABLED(ULTRA_LCD)
-#include "language.h"
+#include "messages/language.h"
 #include "cardreader.h"
 #include "temperature.h"
 #include "stepper.h"

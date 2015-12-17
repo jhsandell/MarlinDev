@@ -123,13 +123,10 @@
 #define MSG_ENDSTOP_ABORT                   "Endstop afbr."
 #define MSG_END_HOUR                        "uur"
 #define MSG_END_MINUTE                      "minuten"
-
-#if ENABLED(DELTA_CALIBRATION_MENU)
-  #define MSG_DELTA_CALIBRATE               "Delta Calibratie"
-  #define MSG_DELTA_CALIBRATE_X             "Kalibreer X"
-  #define MSG_DELTA_CALIBRATE_Y             "Kalibreer Y"
-  #define MSG_DELTA_CALIBRATE_Z             "Kalibreer Z"
-  #define MSG_DELTA_CALIBRATE_CENTER        "Kalibreer Midden"
-#endif // DELTA_CALIBRATION_MENU
+#define MSG_DELTA_CALIBRATE                 "Delta Calibratie"
+#define MSG_DELTA_CALIBRATE_X               "Kalibreer X"
+#define MSG_DELTA_CALIBRATE_Y               "Kalibreer Y"
+#define MSG_DELTA_CALIBRATE_Z               "Kalibreer Z"
+#define MSG_DELTA_CALIBRATE_CENTER          "Kalibreer Midden"
 
 #endif // LANGUAGE_NL_H

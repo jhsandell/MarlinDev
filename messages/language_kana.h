@@ -134,13 +134,10 @@
 #define MSG_ENDSTOPS_HIT                    "endstops hit: "
                    ^ typho
 */
-
-#if ENABLED(DELTA_CALIBRATION_MENU)
-  #define MSG_DELTA_CALIBRATE               "Delta Calibration"
-  #define MSG_DELTA_CALIBRATE_X             "Calibrate X"
-  #define MSG_DELTA_CALIBRATE_Y             "Calibrate Y"
-  #define MSG_DELTA_CALIBRATE_Z             "Calibrate Z"
-  #define MSG_DELTA_CALIBRATE_CENTER        "Calibrate Center"
-#endif // DELTA_CALIBRATION_MENU
+#define MSG_DELTA_CALIBRATE                 "Delta Calibration"
+#define MSG_DELTA_CALIBRATE_X               "Calibrate X"
+#define MSG_DELTA_CALIBRATE_Y               "Calibrate Y"
+#define MSG_DELTA_CALIBRATE_Z               "Calibrate Z"
+#define MSG_DELTA_CALIBRATE_CENTER          "Calibrate Center"
 
 #endif // LANGUAGE_KANA_H

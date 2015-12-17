@@ -20,7 +20,7 @@
 
 #include "ultralcd.h"
 #include "temperature.h"
-#include "language.h"
+#include "messages/language.h"
 #include "Sd2PinMap.h"
 
 #if ENABLED(USE_WATCHDOG)

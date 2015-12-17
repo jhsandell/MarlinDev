@@ -3,8 +3,8 @@
 #include "ultralcd.h"
 #include "stepper.h"
 #include "temperature.h"
-#include "language.h"
 #include "host_interface/host_io.h"
+#include "messages/language.h"
 
 #if ENABLED(SDSUPPORT)
 

@@ -113,7 +113,7 @@
 #define MSG_AUTORETRACT                     " AutoRetr."
 #define MSG_FILAMENTCHANGE                  "Trocar filamento"
 #define MSG_INIT_SDCARD                     "Cartao SD inic."
-#define MSG_CNG_SDCARD                      "Cartao SD trocado
+#define MSG_CNG_SDCARD                      "Cartao SD trocado"
 #define MSG_ZPROBE_OUT                      "Sensor fora d base"
 #define MSG_POSITION_UNKNOWN                "XY antes de Z"
 #define MSG_ZPROBE_ZOFFSET                  "Desvio Z"
@@ -123,13 +123,10 @@
 #define MSG_ENDSTOP_ABORT                   "Endstop abort."
 #define MSG_END_HOUR                        "horas"
 #define MSG_END_MINUTE                      "minutos"
-
-#if ENABLED(DELTA_CALIBRATION_MENU)
-  #define MSG_DELTA_CALIBRATE             "Calibracao Delta"
-  #define MSG_DELTA_CALIBRATE_X           "Calibrar X"
-  #define MSG_DELTA_CALIBRATE_Y           "Calibrar Y"
-  #define MSG_DELTA_CALIBRATE_Z           "Calibrar Z"
-  #define MSG_DELTA_CALIBRATE_CENTER      "Calibrar Centro"
-#endif // DELTA_CALIBRATION_MENU
+#define MSG_DELTA_CALIBRATE                 "Calibracao Delta"
+#define MSG_DELTA_CALIBRATE_X               "Calibrar X"
+#define MSG_DELTA_CALIBRATE_Y               "Calibrar Y"
+#define MSG_DELTA_CALIBRATE_Z               "Calibrar Z"
+#define MSG_DELTA_CALIBRATE_CENTER          "Calibrar Centro"
 
 #endif // LANGUAGE_PT_H

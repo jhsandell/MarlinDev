@@ -91,8 +91,8 @@
  */
 #include "MarlinFirmware.h"
 #include "configuration_store.h"
-#include "language.h"
 #include "host_interface/host_io.h"
+#include "messages/language.h"
 #include "planner.h"
 #include "temperature.h"
 #include "ultralcd.h"

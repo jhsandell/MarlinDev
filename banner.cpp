@@ -1,7 +1,7 @@
 #include "MarlinFirmware.h"
 #include "banner.h"
 #include "host_interface/host_io.h"
-#include "language.h"
+#include "messages/language.h"
 #include "Version.h"
 #include "planner_queue.h"
 #include "free_memory.h"
