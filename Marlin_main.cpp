@@ -72,8 +72,14 @@
 #include "gCodes/gCodes.h"
 #include "banner.h"
 #include "host_interface/host_io.h"
+
 // Access to the probe
 #include "probe_management/probe_management.h"
+
+// Access to motion management
+#include "motion/motion.h"
+
+#include "unit_conversion.h"
 
 /**
  * Look here for descriptions of G-codes:
@@ -243,7 +249,7 @@ bool Running = true;
 
 uint8_t marlin_debug_flags = DEBUG_INFO | DEBUG_ERRORS;
 
-static float feedrate = 1500.0, saved_feedrate;
+float feedrate = 1500.0, saved_feedrate;
 float current_position[NUM_AXIS] = { 0.0 };
 static float destination[NUM_AXIS] = { 0.0 };
 bool axis_known_position[3] = { false };
@@ -293,7 +299,6 @@ static uint8_t target_extruder;
 bool target_direction;
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-  int xy_travel_speed = XY_TRAVEL_SPEED;
   float zprobe_zoffset = Z_PROBE_OFFSET_FROM_EXTRUDER;
 #endif
 
