@@ -18,7 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 #if ENABLED(SDSUPPORT)
 
 #ifndef Sd2Card_h

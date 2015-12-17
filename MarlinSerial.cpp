@@ -20,8 +20,7 @@
   Modified 28 September 2010 by Mark Sproul
 */
 
-#include "Marlin.h"
-#include "MarlinSerial.h"
+#include "MarlinFirmware.h"
 
 #ifndef USBCON
 // this next line disables the entire HardwareSerial.cpp,

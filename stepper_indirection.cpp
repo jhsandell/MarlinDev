@@ -19,8 +19,8 @@
   along with Marlin.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "stepper_indirection.h"
 #include "MarlinFirmware.h"
+#include "stepper_indirection.h"
 
 #if ENABLED(HAVE_TMCDRIVER)
   #include <SPI.h>

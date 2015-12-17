@@ -21,7 +21,7 @@
 //
 
 
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 
 #if ENABLED(M100_FREE_MEMORY_WATCHER)
 extern void* __brkval;

@@ -1,8 +1,7 @@
 #ifndef THERMISTORTABLES_H_
 #define THERMISTORTABLES_H_
 
-#include "Marlin.h"
-#include "macros.h"
+#include "MarlinFirmware.h"
 
 #define OVERSAMPLENR 16
 

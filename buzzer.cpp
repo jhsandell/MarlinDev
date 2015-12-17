@@ -1,4 +1,4 @@
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 #if HAS_BUZZER
   #include "buzzer.h"
   #include "ultralcd.h"

@@ -17,10 +17,10 @@
  * along with the Arduino Sd2Card Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "Marlin.h"
+#include "Sd2Card.h"
 
 #if ENABLED(SDSUPPORT)
-#include "Sd2Card.h"
+
 //------------------------------------------------------------------------------
 #if DISABLED(SOFTWARE_SPI)
   // functions for hardware SPI

@@ -24,7 +24,7 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 #include "planner_queue.h"
 
 // Initialize the motion plan subsystem

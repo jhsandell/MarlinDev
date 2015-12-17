@@ -89,14 +89,13 @@
  *  M666 Z    z_endstop_adj
  *
  */
-#include "Marlin.h"
+#include "MarlinFirmware.h"
+#include "configuration_store.h"
 #include "language.h"
 #include "host_interface/host_io.h"
-
 #include "planner.h"
 #include "temperature.h"
 #include "ultralcd.h"
-#include "configuration_store.h"
 
 #if ENABLED(MESH_BED_LEVELING)
   #include "mesh_bed_leveling.h"

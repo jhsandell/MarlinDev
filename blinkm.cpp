@@ -2,7 +2,7 @@
   blinkm.cpp - Library for controlling a BlinkM over i2c
   Created by Tim Koster, August 21 2013.
 */
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 
 #if ENABLED(BLINKM)
 

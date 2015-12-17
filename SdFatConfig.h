@@ -21,7 +21,7 @@
  * \file
  * \brief configuration definitions
  */
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 #if ENABLED(SDSUPPORT)
 
 #ifndef SdFatConfig_h

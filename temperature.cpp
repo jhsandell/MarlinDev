@@ -18,7 +18,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Marlin.h"
 #include "ultralcd.h"
 #include "temperature.h"
 #include "language.h"

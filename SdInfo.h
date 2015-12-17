@@ -17,7 +17,7 @@
  * along with the Arduino Sd2Card Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 #if ENABLED(SDSUPPORT)
 
 #ifndef SdInfo_h

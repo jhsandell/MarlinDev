@@ -21,7 +21,6 @@
 #ifndef TEMPERATURE_H
 #define TEMPERATURE_H
 
-#include "Marlin.h"
 #include "planner.h"
 #if ENABLED(PID_ADD_EXTRUSION_RATE)
   #include "stepper.h"

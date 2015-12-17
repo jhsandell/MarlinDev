@@ -1,8 +1,6 @@
-#include "Marlin.h"
+#include "watchdog.h"
 
 #if ENABLED(USE_WATCHDOG)
-
-#include "watchdog.h"
 
 // Initialize watchdog with a 4 sec interrupt time
 void watchdog_init() {

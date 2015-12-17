@@ -1,6 +1,5 @@
 #include "ultralcd.h"
 #if ENABLED(ULTRA_LCD)
-#include "Marlin.h"
 #include "language.h"
 #include "cardreader.h"
 #include "temperature.h"

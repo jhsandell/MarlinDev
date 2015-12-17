@@ -1,7 +1,7 @@
 #ifndef ULTRALCD_H
 #define ULTRALCD_H
 
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 #if ENABLED(ULTRA_LCD)
   #include "buzzer.h"
 

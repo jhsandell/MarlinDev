@@ -143,7 +143,7 @@
  *        Rxxx Wait for extruder current temp to reach target temp. Waits when heating and cooling
  *        IF AUTOTEMP is enabled, S<mintemp> B<maxtemp> F<factor>. Exit autotemp by any M109 without F
  * M110 - Set the current line number
- * M111 - Set debug flags with S<mask>. See flag bits defined in Marlin.h.
+ * M111 - Set debug flags with S<mask>. See flag bits defined in MarlinFirmware.h.
  * M112 - Emergency stop
  * M114 - Output current position to serial port
  * M115 - Capabilities string

@@ -17,10 +17,9 @@
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "Marlin.h"
+#include "SdVolume.h"
 #if ENABLED(SDSUPPORT)
 
-#include "SdVolume.h"
 //------------------------------------------------------------------------------
 #if !USE_MULTIPLE_CARDS
   // raw block cache

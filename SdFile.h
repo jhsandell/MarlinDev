@@ -21,7 +21,7 @@
  * \file
  * \brief SdFile class
  */
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 
 #if ENABLED(SDSUPPORT)
 #include "SdBaseFile.h"
