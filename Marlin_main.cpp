@@ -3660,6 +3660,12 @@ void process_next_command() {
 
       #endif //FWRETRACT
 
+      #if ENABLED(DELTA) && ENABLED(USE_PROBE)
+        case 27:
+          gcode_G27();
+          break;
+      #endif
+
       #if ENABLED(AUTO_BED_LEVELING_FEATURE)
 
         #if DISABLED(Z_PROBE_SLED)
