@@ -2,7 +2,8 @@
 
 #define STRING_CONFIG_H_AUTHOR "(R Wackerbarth)" // Who made the changes.
 
-#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
+#define ULTRA_LCD  //general LCD support, also 16x2
+//#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
 
 // Use a simulated temperature probe
 #define TEMP_SENSOR_0 998
