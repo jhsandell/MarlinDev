@@ -54,8 +54,8 @@ static unsigned int cleaning_buffer_counter;
 
 #if ENABLED(Z_DUAL_ENDSTOPS)
   static bool performing_homing = false,
-              locked_z_motor = false,
-              locked_z2_motor = false;
+  locked_z_motor = false,
+  locked_z2_motor = false;
 #endif
 
 // Counter variables for the Bresenham line tracer
@@ -162,6 +162,7 @@ volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1 };
 
 #define E_APPLY_STEP(v,Q) E_STEP_WRITE(v)
 
+#ifdef ARDUINO_ARCH_AVR
 // intRes = intIn1 * intIn2 >> 16
 // uses:
 // r26 to store 0
@@ -245,8 +246,17 @@ volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1 };
 
 // Some useful constants
 
-#define ENABLE_STEPPER_DRIVER_INTERRUPT()  TIMSK1 |= BIT(OCIE1A)
-#define DISABLE_STEPPER_DRIVER_INTERRUPT() TIMSK1 &= ~BIT(OCIE1A)
+  #define ENABLE_STEPPER_DRIVER_INTERRUPT()  TIMSK1 |= BIT(OCIE1A)
+  #define DISABLE_STEPPER_DRIVER_INTERRUPT() TIMSK1 &= ~BIT(OCIE1A)
+#else
+  #define MultiU24X32toH16(intRes, longIn1, longIn2) \
+    intRes = longIn1 * longIn2
+  #define MultiU16X8toH16(intRes, charIn1, intIn2) \
+    intRes = charIn1 * intIn2
+
+ #define ENABLE_STEPPER_DRIVER_INTERRUPT()
+ #define DISABLE_STEPPER_DRIVER_INTERRUPT()
+#endif
 
 void endstops_hit_on_purpose() {
   endstop_hit_bits = 0;
@@ -757,6 +767,7 @@ ISR(TIMER1_COMPA_vect) {
       step_loops = step_loops_nominal;
     }
 
+    // If we are spending too long here, take the next step ASAP
     OCR1A = (OCR1A < (TCNT1 + 16)) ? (TCNT1 + 16) : OCR1A;
 
     // If current block is finished, reset pointer
@@ -887,45 +898,55 @@ void st_init() {
 
   #if HAS_X_ENABLE
     X_ENABLE_INIT;
-    if (!X_ENABLE_ON) X_ENABLE_WRITE(HIGH);
+    if (!X_ENABLE_ON)
+      X_ENABLE_WRITE(HIGH);
   #endif
   #if HAS_X2_ENABLE
     X2_ENABLE_INIT;
-    if (!X_ENABLE_ON) X2_ENABLE_WRITE(HIGH);
+    if (!X_ENABLE_ON)
+      X2_ENABLE_WRITE(HIGH);
   #endif
   #if HAS_Y_ENABLE
     Y_ENABLE_INIT;
-    if (!Y_ENABLE_ON) Y_ENABLE_WRITE(HIGH);
+    if (!Y_ENABLE_ON)
+      Y_ENABLE_WRITE(HIGH);
 
   #if ENABLED(Y_DUAL_STEPPER_DRIVERS) && HAS_Y2_ENABLE
     Y2_ENABLE_INIT;
-    if (!Y_ENABLE_ON) Y2_ENABLE_WRITE(HIGH);
+    if (!Y_ENABLE_ON)
+      Y2_ENABLE_WRITE(HIGH);
   #endif
   #endif
   #if HAS_Z_ENABLE
     Z_ENABLE_INIT;
-    if (!Z_ENABLE_ON) Z_ENABLE_WRITE(HIGH);
+    if (!Z_ENABLE_ON)
+      Z_ENABLE_WRITE(HIGH);
 
     #if ENABLED(Z_DUAL_STEPPER_DRIVERS) && HAS_Z2_ENABLE
       Z2_ENABLE_INIT;
-      if (!Z_ENABLE_ON) Z2_ENABLE_WRITE(HIGH);
+      if (!Z_ENABLE_ON)
+        Z2_ENABLE_WRITE(HIGH);
     #endif
   #endif
   #if HAS_E0_ENABLE
     E0_ENABLE_INIT;
-    if (!E_ENABLE_ON) E0_ENABLE_WRITE(HIGH);
+    if (!E_ENABLE_ON)
+      E0_ENABLE_WRITE(HIGH);
   #endif
   #if HAS_E1_ENABLE
     E1_ENABLE_INIT;
-    if (!E_ENABLE_ON) E1_ENABLE_WRITE(HIGH);
+    if (!E_ENABLE_ON)
+      E1_ENABLE_WRITE(HIGH);
   #endif
   #if HAS_E2_ENABLE
     E2_ENABLE_INIT;
-    if (!E_ENABLE_ON) E2_ENABLE_WRITE(HIGH);
+    if (!E_ENABLE_ON)
+      E2_ENABLE_WRITE(HIGH);
   #endif
   #if HAS_E3_ENABLE
     E3_ENABLE_INIT;
-    if (!E_ENABLE_ON) E3_ENABLE_WRITE(HIGH);
+    if (!E_ENABLE_ON)
+      E3_ENABLE_WRITE(HIGH);
   #endif
 
   //endstops and pullups
@@ -1068,8 +1089,9 @@ void st_init() {
   #endif //ADVANCE
 
   enable_endstops(true); // Start with endstops active. After homing they can be disabled
-  sei();
-
+  #ifdef ARDUINO_ARCH_AVR
+    sei();
+  #endif
   set_stepper_direction(); // Init directions to out_bits = 0
 }
 

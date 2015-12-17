@@ -3,6 +3,36 @@
   why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 */
 
+#ifdef ARDUINO_ARCH_HOST
+#define _FASTIO_ARDUINO_H
+/// Read a pin wrapper
+#define READ(IO) 0
+/// Write to a pin wrapper
+#define WRITE(IO, v)
+
+/// toggle a pin wrapper
+#define TOGGLE(IO)
+
+/// set pin as input wrapper
+#define SET_INPUT(IO)
+/// set pin as output wrapper
+#define SET_OUTPUT(IO)
+
+/// check if pin is an input wrapper
+#define GET_INPUT(IO) 0
+/// check if pin is an output wrapper
+#define GET_OUTPUT(IO) 0
+
+/// check if pin is an timer wrapper
+#define GET_TIMER(IO) 0
+
+// Shorthand
+#define OUT_WRITE(IO, v) {}
+#endif
+
+
+
+
 #ifndef _FASTIO_ARDUINO_H
 #define _FASTIO_ARDUINO_H
 
@@ -4016,7 +4046,9 @@
 #endif
 
 #ifndef DIO0_PIN
+#ifndef ARDUINO_ARCH_HOST
   #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request
+#endif
 #endif
 
 #endif /* _FASTIO_ARDUINO_H */

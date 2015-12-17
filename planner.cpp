@@ -611,7 +611,8 @@ float junction_deviation = 0.1;
       enable_y();
     }
     #if DISABLED(Z_LATE_ENABLE)
-      if (block->steps[Z_AXIS]) enable_z();
+      if (block->steps[Z_AXIS])
+        enable_z();
     #endif
   #elif ENABLED(COREXZ)
     if (block->steps[A_AXIS] || block->steps[C_AXIS]) {
@@ -620,10 +621,13 @@ float junction_deviation = 0.1;
     }
     if (block->steps[Y_AXIS]) enable_y();
   #else
-    if (block->steps[X_AXIS]) enable_x();
-    if (block->steps[Y_AXIS]) enable_y();
+    if (block->steps[X_AXIS])
+      enable_x();
+    if (block->steps[Y_AXIS])
+      enable_y();
     #if DISABLED(Z_LATE_ENABLE)
-      if (block->steps[Z_AXIS]) enable_z();
+      if (block->steps[Z_AXIS])
+        enable_z();
     #endif
   #endif
 
@@ -645,11 +649,14 @@ float junction_deviation = 0.1;
           #endif
           g_uc_extruder_last_move[0] = BLOCK_BUFFER_SIZE * 2;
           #if EXTRUDERS > 1
-            if (g_uc_extruder_last_move[1] == 0) disable_e1();
+            if (g_uc_extruder_last_move[1] == 0)
+              disable_e1();
             #if EXTRUDERS > 2
-              if (g_uc_extruder_last_move[2] == 0) disable_e2();
+              if (g_uc_extruder_last_move[2] == 0)
+                disable_e2();
               #if EXTRUDERS > 3
-                if (g_uc_extruder_last_move[3] == 0) disable_e3();
+                if (g_uc_extruder_last_move[3] == 0)
+                  disable_e3();
               #endif
             #endif
           #endif
@@ -658,11 +665,14 @@ float junction_deviation = 0.1;
           case 1:
             enable_e1();
             g_uc_extruder_last_move[1] = BLOCK_BUFFER_SIZE * 2;
-            if (g_uc_extruder_last_move[0] == 0) disable_e0();
+            if (g_uc_extruder_last_move[0] == 0)
+              disable_e0();
             #if EXTRUDERS > 2
-              if (g_uc_extruder_last_move[2] == 0) disable_e2();
+              if (g_uc_extruder_last_move[2] == 0)
+                disable_e2();
               #if EXTRUDERS > 3
-                if (g_uc_extruder_last_move[3] == 0) disable_e3();
+                if (g_uc_extruder_last_move[3] == 0)
+                  disable_e3();
               #endif
             #endif
           break;
@@ -670,19 +680,25 @@ float junction_deviation = 0.1;
             case 2:
               enable_e2();
               g_uc_extruder_last_move[2] = BLOCK_BUFFER_SIZE * 2;
-              if (g_uc_extruder_last_move[0] == 0) disable_e0();
-              if (g_uc_extruder_last_move[1] == 0) disable_e1();
+              if (g_uc_extruder_last_move[0] == 0)
+                disable_e0();
+              if (g_uc_extruder_last_move[1] == 0)
+                disable_e1();
               #if EXTRUDERS > 3
-                if (g_uc_extruder_last_move[3] == 0) disable_e3();
+                if (g_uc_extruder_last_move[3] == 0)
+                  disable_e3();
               #endif
             break;
             #if EXTRUDERS > 3
               case 3:
                 enable_e3();
                 g_uc_extruder_last_move[3] = BLOCK_BUFFER_SIZE * 2;
-                if (g_uc_extruder_last_move[0] == 0) disable_e0();
-                if (g_uc_extruder_last_move[1] == 0) disable_e1();
-                if (g_uc_extruder_last_move[2] == 0) disable_e2();
+                if (g_uc_extruder_last_move[0] == 0)
+                  disable_e0();
+                if (g_uc_extruder_last_move[1] == 0)
+                  disable_e1();
+                if (g_uc_extruder_last_move[2] == 0)
+                  disable_e2();
               break;
             #endif // EXTRUDERS > 3
           #endif // EXTRUDERS > 2
