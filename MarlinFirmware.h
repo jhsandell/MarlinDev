@@ -16,4 +16,5 @@
   #error Failed to properly include configuration parameters
 #endif
 
+#include "pins/pins.h"
 #endif //MARLINFIRMWARE_H

@@ -219,7 +219,7 @@
 
   #define CONDITIONALS_H
 
-  #include "pins.h"
+  #include "pins/pins.h"
 
   #ifndef USBCON
     #define HardwareSerial_h // trick to disable the standard HWserial

@@ -6,13 +6,17 @@
  */
 
 #ifndef __AVR_AT90USB1286__
-  #error Oops!  Make sure you have 'Brainwave Pro' selected from the 'Tools -> Boards' menu.
+  #ifndef ARDUINO_ARCH_HOST
+    #error Oops!  Make sure you have 'Brainwave Pro' selected from the 'Tools -> Boards' menu.
+  #endif
 #endif
 
 #include "fastio.h"
 
 #ifndef AT90USBxx_TEENSYPP_ASSIGNMENTS  // use Teensyduino Teensy++2.0 pin assignments instead of Marlin alphabetical.
-  #error  Uncomment #define AT90USBxx_TEENSYPP_ASSIGNMENTS in fastio.h for this config
+  #ifndef ARDUINO_ARCH_HOST
+    #error  Uncomment #define AT90USBxx_TEENSYPP_ASSIGNMENTS in fastio.h for this config
+  #endif
 #endif
 
 #define LARGE_FLASH        true
@@ -32,6 +36,7 @@
 #define Z_ENABLE_PIN       37
 #define Z_MAX_PIN          36
 #define Z_MIN_PROBE_PIN    17  // Bed Z probe
+#define Z_MIN_PIN          -1
 
 #define E0_STEP_PIN        35
 #define E0_DIR_PIN         34
