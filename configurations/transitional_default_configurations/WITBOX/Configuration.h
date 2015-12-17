@@ -1,50 +1,5 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
-
-#include "boards.h"
-#include "macros.h"
-
-//===========================================================================
-//============================= Getting Started =============================
-//===========================================================================
-/*
-Here are some standard links for getting your machine calibrated:
- * http://reprap.org/wiki/Calibration
- * http://youtu.be/wAL9d7FgInk
- * http://calculator.josefprusa.cz
- * http://reprap.org/wiki/Triffid_Hunter%27s_Calibration_Guide
- * http://www.thingiverse.com/thing:5573
- * https://sites.google.com/site/repraplogphase/calibration-of-your-reprap
- * http://www.thingiverse.com/thing:298812
-*/
-
-// This configuration file contains the basic settings.
-// Advanced settings can be found in Configuration_adv.h
-// BASIC SETTINGS: select your board type, temperature sensor type, axis scaling, and endstop configuration
-
-//===========================================================================
-//============================= DELTA Printer ===============================
-//===========================================================================
-// For a Delta printer replace the configuration files with the files in the
-// example_configurations/delta directory.
-//
-
-//===========================================================================
-//============================= SCARA Printer ===============================
-//===========================================================================
-// For a Scara printer replace the configuration files with the files in the
-// example_configurations/SCARA directory.
-//
-
-// @section info
-
-// User-specified version info of this build to display in [Pronterface, etc] terminal window during
-// startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
-// build by the user have been successfully uploaded into firmware.
 #define STRING_CONFIG_H_AUTHOR "(bq Witbox)" // Who made the changes.
-#define SHOW_BOOTSCREEN
-//#define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION // will be shown during bootup in line 1
-//#define STRING_SPLASH_LINE2 STRING_DISTRIBUTION_DATE // will be shown during bootup in line 2
+#include "configurations/design/default/Configuration.h"
 
 // @section machine
 
@@ -79,7 +34,6 @@ Here are some standard links for getting your machine calibrated:
 //#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
 
 // This defines the number of extruders
-// :[1,2,3,4]
 #define EXTRUDERS 1
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
@@ -312,13 +266,13 @@ Here are some standard links for getting your machine calibrated:
 #endif
 
 // Mechanical endstop with COM to ground and NC to Signal uses "false" here (most common setup).
-const bool X_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool Y_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool Z_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool X_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool Y_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
+const bool X_MIN_ENDSTOP_INVERTED
+const bool Y_MIN_ENDSTOP_INVERTED
+const bool Z_MIN_ENDSTOP_INVERTED
+const bool X_MAX_ENDSTOP_INVERTED
+const bool Y_MAX_ENDSTOP_INVERTED
+const bool Z_MAX_ENDSTOP_INVERTED
+const bool Z_MIN_PROBE_ENDSTOP_INVERTED
 //#define DISABLE_MAX_ENDSTOPS
 //#define DISABLE_MIN_ENDSTOPS
 

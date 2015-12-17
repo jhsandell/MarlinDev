@@ -27,22 +27,20 @@
    * degrees, the machine is halted, requiring a hard reset. This test restarts with any M104/M109,
    * but only if the current temperature is far enough below the target for a reliable test.
    */
-  #define WATCH_TEMP_PERIOD 16                // Seconds
-  #define WATCH_TEMP_INCREASE 4               // Degrees Celsius
+  #ifndef WATCH_TEMP_PERIOD
+    #define WATCH_TEMP_PERIOD 16              // Seconds
+  #endif
+  #ifndef WATCH_TEMP_INCREASE
+    #define WATCH_TEMP_INCREASE 4             // Degrees Celsius
+  #endif
 #endif
 
 #if ENABLED(THERMAL_PROTECTION_BED)
-  #define THERMAL_PROTECTION_BED_PERIOD 20    // Seconds
-  #define THERMAL_PROTECTION_BED_HYSTERESIS 2 // Degrees Celsius
-#endif
-
-#if ENABLED(PIDTEMP)
-  // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
-  // if Kc is chosen well, the additional required power due to increased melting should be compensated.
-  #define PID_ADD_EXTRUSION_RATE
-  #if ENABLED(PID_ADD_EXTRUSION_RATE)
-    #define DEFAULT_Kc (100) //heating power=Kc*(e_speed)
-    #define LPQ_MAX_LEN 50
+  #ifndef THERMAL_PROTECTION_BED_PERIOD
+    #define THERMAL_PROTECTION_BED_PERIOD 20    // Seconds
+  #endif
+  #ifndef THERMAL_PROTECTION_BED_HYSTERESIS
+    #define THERMAL_PROTECTION_BED_HYSTERESIS 2 // Degrees Celsius
   #endif
 #endif
 
@@ -56,6 +54,24 @@
  * Also, if the temperature is set to a value below mintemp, it will not be changed by autotemp.
  * On an Ultimaker, some initial testing worked with M109 S215 B260 F1 in the start.gcode
  */
+#if ENABLED(PIDTEMP)
+  // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
+  // if Kc is chosen well, the additional required power due to increased melting should be compensated.
+  #define PID_ADD_EXTRUSION_RATE
+  #if ENABLED(PID_ADD_EXTRUSION_RATE)
+    #define DEFAULT_Kc (100) //heating power=Kc*(e_speed)
+    #define LPQ_MAX_LEN 50
+  #endif
+#endif
+
+
+//automatic temperature: The hot end target temperature is calculated by all the buffered lines of gcode.
+//The maximum buffered steps/sec of the extruder motor are called "se".
+//You enter the autotemp mode by a M109 S<mintemp> B<maxtemp> F<factor>
+// the target temperature is set to mintemp+factor*se[steps/sec] and limited by mintemp and maxtemp
+// you exit the value by any M109 without F*
+// Also, if the temperature is set to a value <mintemp, it is not changed by autotemp.
+// on an Ultimaker, some initial testing worked with M109 S215 B260 F1 in the start.gcode
 #define AUTOTEMP
 #if ENABLED(AUTOTEMP)
   #define AUTOTEMP_OLDWEIGHT 0.98
@@ -121,7 +137,10 @@
 
 // @section homing
 
-#define ENDSTOPS_ONLY_FOR_HOMING // If defined the endstops will only be used for homing
+// If defined the endstops will only be used for homing
+#ifndef ENDSTOPS_ONLY_FOR_HOMING
+  #define ENDSTOPS_ONLY_FOR_HOMING 
+#endif
 
 // @section extras
 
@@ -148,7 +167,9 @@
   //#define Z_DUAL_ENDSTOPS
 
   #if ENABLED(Z_DUAL_ENDSTOPS)
-    #define Z2_MAX_PIN 36                     //Endstop used for Z2 axis. In this case I'm using XMAX in a Rumba Board (pin 36)
+    #ifndef Z2_MAX_PIN
+      #define Z2_MAX_PIN 36                     //Endstop used for Z2 axis. In this case I'm using XMAX in a Rumba Board (pin 36)
+    #endif
     const bool Z2_MAX_ENDSTOP_INVERTING = false;
     #define DISABLE_XMAX_ENDSTOP              //Better to disable the XMAX to avoid conflict. Just rename "XMAX_ENDSTOP" by the endstop you are using for Z2 axis.
   #endif
@@ -210,10 +231,18 @@
 // @section homing
 
 //homing hits the endstop, then retracts by this distance, before it tries to slowly bump again:
-#define X_HOME_BUMP_MM 5
-#define Y_HOME_BUMP_MM 5
-#define Z_HOME_BUMP_MM 2
-#define HOMING_BUMP_DIVISOR {2, 2, 4}  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+#ifndef X_HOME_BUMP_MM
+  #define X_HOME_BUMP_MM 5
+#endif
+#ifndef Y_HOME_BUMP_MM
+  #define Y_HOME_BUMP_MM 5
+#endif
+#ifndef Z_HOME_BUMP_MM
+  #define Z_HOME_BUMP_MM 2
+#endif
+#ifndef HOMING_BUMP_DIVISOR
+  #define HOMING_BUMP_DIVISOR {2, 2, 4}  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+#endif
 //#define QUICK_HOME  //if this is defined, if both x and y are to be homed, a diagonal move will be performed initially.
 
 // When G28 is called, this option will make Y home before X
@@ -232,7 +261,9 @@
 #define INVERT_E_STEP_PIN false
 
 // Default stepper release if idle. Set to 0 to deactivate.
-#define DEFAULT_STEPPER_DEACTIVE_TIME 60
+#ifndef DEFAULT_STEPPER_DEACTIVE_TIME
+  #define DEFAULT_STEPPER_DEACTIVE_TIME 60
+#endif
 
 #define DEFAULT_MINIMUMFEEDRATE       0.0     // minimum feedrate
 #define DEFAULT_MINTRAVELFEEDRATE     0.0
@@ -250,7 +281,9 @@
 #define DEFAULT_MINSEGMENTTIME        20000
 
 // If defined the movements slow down when the look ahead buffer is only half full
-#define SLOWDOWN
+#ifndef SLOWDOWN
+  #define SLOWDOWN
+#endif
 
 // Frequency limit
 // See nophead's blog for more info
@@ -347,10 +380,10 @@
 //#define USE_WATCHDOG
 
 #if ENABLED(USE_WATCHDOG)
-// If you have a watchdog reboot in an ArduinoMega2560 then the device will hang forever, as a watchdog reset will leave the watchdog on.
-// The "WATCHDOG_RESET_MANUAL" goes around this by not using the hardware reset.
-//  However, THIS FEATURE IS UNSAFE!, as it will only work if interrupts are disabled. And the code could hang in an interrupt routine with interrupts disabled.
-//#define WATCHDOG_RESET_MANUAL
+  // If you have a watchdog reboot in an ArduinoMega2560 then the device will hang forever, as a watchdog reset will leave the watchdog on.
+  // The "WATCHDOG_RESET_MANUAL" goes around this by not using the hardware reset.
+  //  However, THIS FEATURE IS UNSAFE!, as it will only work if interrupts are disabled. And the code could hang in an interrupt routine with interrupts disabled.
+  //#define WATCHDOG_RESET_MANUAL
 #endif
 
 // @section lcd
@@ -389,7 +422,7 @@
 #define MM_PER_ARC_SEGMENT 1
 #define N_ARC_CORRECTION 25
 
-const unsigned int dropsegments=5; //everything with less than this number of steps will be ignored as move and joined with the next movement
+const unsigned int dropsegments = 5; //everything with less than this number of steps will be ignored as move and joined with the next movement
 
 // @section temperature
 
@@ -436,13 +469,19 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 //#define FWRETRACT  //ONLY PARTIALLY TESTED
 #if ENABLED(FWRETRACT)
   #define MIN_RETRACT 0.1                //minimum extruded mm to accept a automatic gcode retraction attempt
-  #define RETRACT_LENGTH 3               //default retract length (positive mm)
+  #ifndef RETRACT_LENGTH
+    #define RETRACT_LENGTH 3             //default retract length (positive mm)
+  #endif
   #define RETRACT_LENGTH_SWAP 13         //default swap retract length (positive mm), for extruder change
-  #define RETRACT_FEEDRATE 45            //default feedrate for retracting (mm/s)
+  #ifndef RETRACT_FEEDRATE
+    #define RETRACT_FEEDRATE 45          //default feedrate for retracting (mm/s)
+  #endif
   #define RETRACT_ZLIFT 0                //default retract Z-lift
   #define RETRACT_RECOVER_LENGTH 0       //default additional recover length (mm, added to retract length when recovering)
   #define RETRACT_RECOVER_LENGTH_SWAP 0  //default additional swap recover length (mm, added to retract length when recovering from extruder change)
-  #define RETRACT_RECOVER_FEEDRATE 8     //default feedrate for recovering from retraction (mm/s)
+  #ifndef RETRACT_RECOVER_FEEDRATE
+    #define RETRACT_RECOVER_FEEDRATE 8   //default feedrate for recovering from retraction (mm/s)
+  #endif
 #endif
 
 // Add support for experimental filament exchange support M600; requires display
@@ -470,52 +509,52 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 //#define HAVE_TMCDRIVER
 #if ENABLED(HAVE_TMCDRIVER)
 
-//#define X_IS_TMC
+  //#define X_IS_TMC
   #define X_MAX_CURRENT 1000  //in mA
   #define X_SENSE_RESISTOR 91 //in mOhms
   #define X_MICROSTEPS 16     //number of microsteps
 
-//#define X2_IS_TMC
+  //#define X2_IS_TMC
   #define X2_MAX_CURRENT 1000  //in mA
   #define X2_SENSE_RESISTOR 91 //in mOhms
   #define X2_MICROSTEPS 16     //number of microsteps
 
-//#define Y_IS_TMC
+  //#define Y_IS_TMC
   #define Y_MAX_CURRENT 1000  //in mA
   #define Y_SENSE_RESISTOR 91 //in mOhms
   #define Y_MICROSTEPS 16     //number of microsteps
 
-//#define Y2_IS_TMC
+  //#define Y2_IS_TMC
   #define Y2_MAX_CURRENT 1000  //in mA
   #define Y2_SENSE_RESISTOR 91 //in mOhms
   #define Y2_MICROSTEPS 16     //number of microsteps
 
-//#define Z_IS_TMC
+  //#define Z_IS_TMC
   #define Z_MAX_CURRENT 1000  //in mA
   #define Z_SENSE_RESISTOR 91 //in mOhms
   #define Z_MICROSTEPS 16     //number of microsteps
 
-//#define Z2_IS_TMC
+  //#define Z2_IS_TMC
   #define Z2_MAX_CURRENT 1000  //in mA
   #define Z2_SENSE_RESISTOR 91 //in mOhms
   #define Z2_MICROSTEPS 16     //number of microsteps
 
-//#define E0_IS_TMC
+  //#define E0_IS_TMC
   #define E0_MAX_CURRENT 1000  //in mA
   #define E0_SENSE_RESISTOR 91 //in mOhms
   #define E0_MICROSTEPS 16     //number of microsteps
 
-//#define E1_IS_TMC
+  //#define E1_IS_TMC
   #define E1_MAX_CURRENT 1000  //in mA
   #define E1_SENSE_RESISTOR 91 //in mOhms
   #define E1_MICROSTEPS 16     //number of microsteps
 
-//#define E2_IS_TMC
+  //#define E2_IS_TMC
   #define E2_MAX_CURRENT 1000  //in mA
   #define E2_SENSE_RESISTOR 91 //in mOhms
   #define E2_MICROSTEPS 16     //number of microsteps
 
-//#define E3_IS_TMC
+  //#define E3_IS_TMC
   #define E3_MAX_CURRENT 1000  //in mA
   #define E3_SENSE_RESISTOR 91 //in mOhms
   #define E3_MICROSTEPS 16     //number of microsteps
@@ -532,64 +571,61 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 //#define HAVE_L6470DRIVER
 #if ENABLED(HAVE_L6470DRIVER)
 
-//#define X_IS_L6470
+  //#define X_IS_L6470
   #define X_MICROSTEPS 16     //number of microsteps
   #define X_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define X_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define X_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define X2_IS_L6470
+  //#define X2_IS_L6470
   #define X2_MICROSTEPS 16     //number of microsteps
   #define X2_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define X2_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define X2_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define Y_IS_L6470
+  //#define Y_IS_L6470
   #define Y_MICROSTEPS 16     //number of microsteps
   #define Y_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define Y_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define Y_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define Y2_IS_L6470
+  //#define Y2_IS_L6470
   #define Y2_MICROSTEPS 16     //number of microsteps
   #define Y2_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define Y2_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define Y2_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define Z_IS_L6470
+  //#define Z_IS_L6470
   #define Z_MICROSTEPS 16     //number of microsteps
   #define Z_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define Z_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define Z_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define Z2_IS_L6470
+  //#define Z2_IS_L6470
   #define Z2_MICROSTEPS 16     //number of microsteps
   #define Z2_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define Z2_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define Z2_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define E0_IS_L6470
+  //#define E0_IS_L6470
   #define E0_MICROSTEPS 16     //number of microsteps
   #define E0_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define E0_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define E0_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define E1_IS_L6470
-  #define E1_MICROSTEPS 16     //number of microsteps
+  //#define E1_IS_L6470
   #define E1_MICROSTEPS 16     //number of microsteps
   #define E1_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define E1_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define E1_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define E2_IS_L6470
-  #define E2_MICROSTEPS 16     //number of microsteps
+  //#define E2_IS_L6470
   #define E2_MICROSTEPS 16     //number of microsteps
   #define E2_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define E2_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off
   #define E2_STALLCURRENT 1500 //current in mA where the driver will detect a stall
 
-//#define E3_IS_L6470
-  #define E3_MICROSTEPS 16     //number of microsteps
+  //#define E3_IS_L6470
   #define E3_MICROSTEPS 16     //number of microsteps
   #define E3_K_VAL 50          // 0 - 255, Higher values, are higher power. Be carefull not to go too high
   #define E3_OVERCURRENT 2000  //maxc current in mA. If the current goes over this value, the driver will switch off

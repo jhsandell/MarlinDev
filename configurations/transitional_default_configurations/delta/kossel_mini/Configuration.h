@@ -1,33 +1,4 @@
-#include "boards.h"
-#include "macros.h"
-
-//===========================================================================
-//============================= Getting Started =============================
-//===========================================================================
-/*
-Here are some standard links for getting your machine calibrated:
- * http://reprap.org/wiki/Calibration
- * http://youtu.be/wAL9d7FgInk
- * http://calculator.josefprusa.cz
- * http://reprap.org/wiki/Triffid_Hunter%27s_Calibration_Guide
- * http://www.thingiverse.com/thing:5573
- * https://sites.google.com/site/repraplogphase/calibration-of-your-reprap
- * http://www.thingiverse.com/thing:298812
-*/
-
-// This configuration file contains the basic settings.
-// Advanced settings can be found in Configuration_adv.h
-// BASIC SETTINGS: select your board type, temperature sensor type, axis scaling, and endstop configuration
-
-// @section info
-
-// User-specified version info of this build to display in [Pronterface, etc] terminal window during
-// startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
-// build by the user have been successfully uploaded into firmware.
-#define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
-#define SHOW_BOOTSCREEN
-//#define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION // will be shown during bootup in line 1
-//#define STRING_SPLASH_LINE2 STRING_DISTRIBUTION_DATE // will be shown during bootup in line 2
+#include "configurations/design/default/Configuration.h"
 
 // @section machine
 
@@ -426,11 +397,11 @@ Here are some standard links for getting your machine calibrated:
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 
     // set the rectangle in which to probe
-    #define DELTA_PROBABLE_RADIUS (DELTA_PRINTABLE_RADIUS - 10)
-    #define LEFT_PROBE_BED_POSITION -DELTA_PROBABLE_RADIUS
-    #define RIGHT_PROBE_BED_POSITION DELTA_PROBABLE_RADIUS
-    #define FRONT_PROBE_BED_POSITION -DELTA_PROBABLE_RADIUS
-    #define BACK_PROBE_BED_POSITION DELTA_PROBABLE_RADIUS
+    #define DELTA_PROBEABLE_RADIUS (DELTA_PRINTABLE_RADIUS - 10)
+    #define LEFT_PROBE_BED_POSITION -DELTA_PROBEABLE_RADIUS
+    #define RIGHT_PROBE_BED_POSITION DELTA_PROBEABLE_RADIUS
+    #define FRONT_PROBE_BED_POSITION -DELTA_PROBEABLE_RADIUS
+    #define BACK_PROBE_BED_POSITION DELTA_PROBEABLE_RADIUS
 
     #define MIN_PROBE_EDGE 10 // The Z probe square sides can be no smaller than this.
 

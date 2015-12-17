@@ -62,27 +62,27 @@
 #define DELTA_SEGMENTS_PER_SECOND 160
 
 // Center-to-center distance of the holes in the diagonal push rods.
-#ifdef DELTA_DIAGONAL_ROD
+#ifndef DELTA_DIAGONAL_ROD
   #define DELTA_DIAGONAL_ROD 301.0 // mm
 #endif
 
 // Horizontal offset from middle of printer to smooth rod center.
-#ifdef DELTA_SMOOTH_ROD_OFFSET
+#ifndef DELTA_SMOOTH_ROD_OFFSET
   #define DELTA_SMOOTH_ROD_OFFSET 212.357 // mm
 #endif
 
 // Horizontal offset of the universal joints on the end effector.
-#ifdef DELTA_EFFECTOR_OFFSET
+#ifndef DELTA_EFFECTOR_OFFSET
   #define DELTA_EFFECTOR_OFFSET 30.0 // mm
 #endif
 
 // Horizontal offset of the universal joints on the carriages.
-#ifdef DELTA_CARRIAGE_OFFSET
+#ifndef DELTA_CARRIAGE_OFFSET
   #define DELTA_CARRIAGE_OFFSET 30.0 // mm
 #endif
 
 // Print surface diameter/2 minus unreachable space (avoid collisions with vertical towers).
-#ifdef DELTA_PRINTABLE_RADIUS
+#ifndef DELTA_PRINTABLE_RADIUS
   #define DELTA_PRINTABLE_RADIUS 127
 #endif
 
@@ -107,8 +107,8 @@
 //#define Z_MIN_PROBE_REPEATABILITY_TEST  // If not commented out, Z-Probe Repeatability test will be included if Auto Bed Leveling is Enabled.
 
 // set the rectangle in which to probe
-#ifndef DELTA_PROBABLE_RADIUS
-  #define DELTA_PROBABLE_RADIUS (DELTA_PRINTABLE_RADIUS-25)
+#ifndef DELTA_PROBEABLE_RADIUS
+  #define DELTA_PROBEABLE_RADIUS (DELTA_PRINTABLE_RADIUS-25)
 #endif
 
 // Non-linear bed leveling will be used.
@@ -136,7 +136,7 @@
 #endif
 
 #ifndef Z_RAISE_AFTER_PROBING
-  #define Z_RAISE_AFTER_PROBING 15    // How much the Z axis will be raised after the last probing point.
+  #define Z_RAISE_AFTER_PROBING 40    // How much the Z axis will be raised after the last probing point.
 #endif
 
 // Allen key retractable z-probe as seen on many Kossel delta printers - http://reprap.org/wiki/Kossel#Automatic_bed_leveling_probe
@@ -147,28 +147,34 @@
 #define Z_PROBE_ALLEN_KEY_DEPLOY_1_X -105.00 // Move left but not quite so far that we'll bump the belt
 #define Z_PROBE_ALLEN_KEY_DEPLOY_1_Y 0.00
 #define Z_PROBE_ALLEN_KEY_DEPLOY_1_Z 100.0
-#define Z_PROBE_ALLEN_KEY_DEPLOY_1_FEEDRATE HOMING_FEEDRATE_XYZ
-#define Z_PROBE_ALLEN_KEY_DEPLOY_2_X -110.00 // Move outward to position deploy pin to the left of the arm
+//define Z_PROBE_ALLEN_KEY_DEPLOY_1_FEEDRATE HOMING_FEEDRATE_XYZ
+#define Z_PROBE_ALLEN_KEY_DEPLOY_2_X -105.00 // Move outward to position deploy pin to the left of the arm
 #define Z_PROBE_ALLEN_KEY_DEPLOY_2_Y -125.00
-#define Z_PROBE_ALLEN_KEY_DEPLOY_2_Z 100.0
+//#define Z_PROBE_ALLEN_KEY_DEPLOY_2_Z Z_PROBE_ALLEN_KEY_DEPLOY_1_Z
 #define Z_PROBE_ALLEN_KEY_DEPLOY_2_FEEDRATE HOMING_FEEDRATE_XYZ
 #define Z_PROBE_ALLEN_KEY_DEPLOY_3_X 45.00 // Move right to trigger deploy pin
-#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Y -125.00
-#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Z 100.0
+#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Y Z_PROBE_ALLEN_KEY_DEPLOY_2_Y
+#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Z Z_PROBE_ALLEN_KEY_DEPLOY_2_Z
 #define Z_PROBE_ALLEN_KEY_DEPLOY_3_FEEDRATE (HOMING_FEEDRATE_XYZ/2)
 
-#define Z_PROBE_ALLEN_KEY_STOW_1_X 36.00 // Line up with bed retaining clip
-#define Z_PROBE_ALLEN_KEY_STOW_1_Y -122.00
+#ifndef Z_PROBE_ALLEN_KEY_STOW_1_X
+  #define Z_PROBE_ALLEN_KEY_STOW_1_X 36.10 // Line up with bed retaining clip
+#endif
+#ifndef Z_PROBE_ALLEN_KEY_STOW_1_Y
+  #define Z_PROBE_ALLEN_KEY_STOW_1_Y -124.30
+#endif
 #define Z_PROBE_ALLEN_KEY_STOW_1_Z 75.0
-#define Z_PROBE_ALLEN_KEY_STOW_1_FEEDRATE HOMING_FEEDRATE_XYZ
-#define Z_PROBE_ALLEN_KEY_STOW_2_X 36.00 // move down to retract probe
-#define Z_PROBE_ALLEN_KEY_STOW_2_Y -122.00
-#define Z_PROBE_ALLEN_KEY_STOW_2_Z 25.0
+//#define Z_PROBE_ALLEN_KEY_STOW_1_FEEDRATE HOMING_FEEDRATE_XYZ
+//#define Z_PROBE_ALLEN_KEY_STOW_2_X Z_PROBE_ALLEN_KEY_STOW_1_X // move down to retract probe
+//#define Z_PROBE_ALLEN_KEY_STOW_2_Y Z_PROBE_ALLEN_KEY_STOW_1_Y
+#ifndef Z_PROBE_ALLEN_KEY_STOW_2_Z
+  #define Z_PROBE_ALLEN_KEY_STOW_2_Z 4.0
+#endif
 #define Z_PROBE_ALLEN_KEY_STOW_2_FEEDRATE (HOMING_FEEDRATE_XYZ/2)
 #define Z_PROBE_ALLEN_KEY_STOW_3_X 0.0  // return to 0,0,100
 #define Z_PROBE_ALLEN_KEY_STOW_3_Y 0.0
 #define Z_PROBE_ALLEN_KEY_STOW_3_Z 100.0
-#define Z_PROBE_ALLEN_KEY_STOW_3_FEEDRATE HOMING_FEEDRATE_XYZ
+//#define Z_PROBE_ALLEN_KEY_STOW_3_FEEDRATE HOMING_FEEDRATE_XYZ
 
 // @section homing
 
