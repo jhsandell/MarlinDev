@@ -1,0 +1,2 @@
+#include "Version.h"
+#define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION

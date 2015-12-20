@@ -40,14 +40,6 @@
   #define LANGUAGE_INCLUDE GENERATE_LANGUAGE_INCLUDE(en)
 #endif
 
-#if ENABLED(USE_AUTOMATIC_VERSIONING)
-  #include "_Version.h"
-#else
-  #include "Default_Version.h"
-#endif
-
-#define PROTOCOL_VERSION "1.0"
-
 #if MB(ULTIMAKER)|| MB(ULTIMAKER_OLD)|| MB(ULTIMAIN_2)
   #define MACHINE_NAME "Ultimaker"
   #define SOURCE_CODE_URL "https://github.com/Ultimaker/Marlin"

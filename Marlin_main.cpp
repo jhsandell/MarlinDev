@@ -27,7 +27,7 @@
  *  - http://reprap.org/pipermail/reprap-dev/2011-May/003323.html
  */
 
-#include "Marlin.h"
+#include "MarlinFirmware.h"
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
   #include "vector_3.h"

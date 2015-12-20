@@ -34,6 +34,7 @@
 #include "ultralcd.h"
 #include "ultralcd_st7920_u8glib_rrd.h"
 #include "MarlinFirmware.h"
+#include "splash_screens.h"
 
 #if DISABLED(MAPPER_C2C3) && DISABLED(MAPPER_NON) && ENABLED(USE_BIG_EDIT_FONT)
   #undef USE_BIG_EDIT_FONT
