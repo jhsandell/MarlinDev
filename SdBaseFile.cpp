@@ -20,6 +20,7 @@
 
 #include "Marlin.h"
 #if ENABLED(SDSUPPORT)
+#include "host_interface/host_io.h"
 
 #include "SdBaseFile.h"
 //------------------------------------------------------------------------------

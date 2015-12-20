@@ -6,6 +6,7 @@
 #include "temperature.h"
 #include "stepper.h"
 #include "configuration_store.h"
+#include "host_interface/host_io.h"
 
 int8_t encoderDiff; // updated from interrupt context and added to encoderPosition every LCD update
 

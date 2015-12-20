@@ -21,6 +21,7 @@
 
 #if ENABLED(SDSUPPORT)
 #include "SdFatUtil.h"
+#include "host_interface/host_io.h"
 
 //------------------------------------------------------------------------------
 /** Amount of free RAM

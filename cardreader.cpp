@@ -4,6 +4,7 @@
 #include "stepper.h"
 #include "temperature.h"
 #include "language.h"
+#include "host_interface/host_io.h"
 
 #if ENABLED(SDSUPPORT)
 

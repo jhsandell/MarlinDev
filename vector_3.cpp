@@ -21,6 +21,7 @@
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
 #include "vector_3.h"
+#include "host_interface/host_io.h"
 
 vector_3::vector_3() : x(0), y(0), z(0) { }
 

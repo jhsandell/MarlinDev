@@ -284,7 +284,7 @@ void MarlinSerial::printFloat(double number, uint8_t digits) {
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
 
-MarlinSerial customizedSerial;
+MarlinSerial modifiedSerialForMarlin;
 
 #endif // whole file
 #endif // !USBCON

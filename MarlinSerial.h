@@ -19,9 +19,14 @@
   Modified 28 September 2010 by Mark Sproul
 */
 
+#ifndef ARDUINO_ARCH_AVR
+  #define MarlinSerial_h
+#endif
+
 #ifndef MarlinSerial_h
 #define MarlinSerial_h
 #include "Marlin.h"
+
 
 #ifndef SERIAL_PORT
   #define SERIAL_PORT 0
@@ -80,6 +85,9 @@ struct ring_buffer {
 
 #if UART_PRESENT(SERIAL_PORT)
   extern ring_buffer rx_buffer;
+#else
+  #define rx_buffer.head 0
+  #define rx_buffer.tail rx_buffer.head
 #endif
 
 class MarlinSerial { //: public Stream
@@ -148,7 +156,7 @@ class MarlinSerial { //: public Stream
     void println(void);
 };
 
-extern MarlinSerial customizedSerial;
+extern MarlinSerial modifiedSerialForMarlin;
 #endif // !USBCON
 
 // Use the UART for Bluetooth in AT90USB configurations

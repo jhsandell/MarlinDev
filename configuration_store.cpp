@@ -91,6 +91,8 @@
  */
 #include "Marlin.h"
 #include "language.h"
+#include "host_interface/host_io.h"
+
 #include "planner.h"
 #include "temperature.h"
 #include "ultralcd.h"

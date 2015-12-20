@@ -33,6 +33,7 @@
 #if HAS_DIGIPOTSS
   #include <SPI.h>
 #endif
+#include "host_interface/host_io.h"
 
 //===========================================================================
 //============================= public variables ============================
@@ -647,8 +648,8 @@ ISR(TIMER1_COMPA_vect) {
 
     // Take multiple steps per interrupt (For high speed moves)
     for (int8_t i = 0; i < step_loops; i++) {
-      #ifndef USBCON
-        customizedSerial.checkRx(); // Check for serial chars.
+      #if !defined(USBCON) && !defined(ARDUINO_ARCH_HOST)
+        MYSERIAL.checkRx(); // Check for serial chars.
       #endif
 
       #if ENABLED(ADVANCE)
