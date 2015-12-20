@@ -68,6 +68,9 @@
   #include <SPI.h>
 #endif
 
+// The external gCode implementations
+#include "gCodes/gCodes.h"
+
 /**
  * Look here for descriptions of G-codes:
  *  - http://linuxcnc.org/handbook/gcode/g-code.html
