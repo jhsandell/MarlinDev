@@ -247,7 +247,7 @@
 
 bool Running = true;
 
-uint8_t marlin_debug_flags = DEBUG_INFO | DEBUG_ERRORS;
+uint8_t marlin_debug_flags = DEBUG_INFO | DEBUG_ERRORS ; // | DEBUG_LEVELING ;
 
 float feedrate = 1500.0, saved_feedrate;
 float current_position[NUM_AXIS] = { 0.0 };
@@ -611,7 +611,7 @@ void servo_init() {
  *    • servos
  *    • LCD controller
  *    • Digipot I2C
- *    • Z probe sled
+ *    • Z probe
  *    • status LEDs
  */
 void setup() {
@@ -4900,18 +4900,18 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
               oldstatus = E1_ENABLE_READ;
               enable_e1();
               break;
-            #if EXTRUDERS > 2
-              case 2:
-                oldstatus = E2_ENABLE_READ;
-                enable_e2();
-                break;
-              #if EXTRUDERS > 3
-                case 3:
-                  oldstatus = E3_ENABLE_READ;
-                  enable_e3();
-                  break;
-              #endif
-            #endif
+          #endif
+          #if EXTRUDERS > 2
+            case 2:
+              oldstatus = E2_ENABLE_READ;
+              enable_e2();
+              break;
+          #endif
+          #if EXTRUDERS > 3
+            case 3:
+              oldstatus = E3_ENABLE_READ;
+              enable_e3();
+              break;
           #endif
         }
         float oldepos = current_position[E_AXIS], oldedes = destination[E_AXIS];
@@ -4931,16 +4931,16 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
           case 1:
             E1_ENABLE_WRITE(oldstatus);
             break;
-          #if EXTRUDERS > 2
-            case 2:
-              E2_ENABLE_WRITE(oldstatus);
-              break;
-            #if EXTRUDERS > 3
-              case 3:
-                E3_ENABLE_WRITE(oldstatus);
-                break;
-            #endif
-          #endif
+        #endif
+        #if EXTRUDERS > 2
+          case 2:
+            E2_ENABLE_WRITE(oldstatus);
+            break;
+        #endif
+        #if EXTRUDERS > 3
+          case 3:
+            E3_ENABLE_WRITE(oldstatus);
+            break;
         #endif
       }
     }
@@ -4970,23 +4970,28 @@ void kill(const char* lcd_msg) {
     UNUSED(lcd_msg);
   #endif
 
-  cli(); // Stop interrupts
-  disable_all_heaters();
-  disable_all_steppers();
+  {
+    CRITICAL_SECTION_START;
+    disable_all_heaters();
+    disable_all_steppers();
 
-  #if HAS_POWER_SWITCH
-    pinMode(PS_ON_PIN, INPUT);
-  #endif
+    #if HAS_POWER_SWITCH
+      pinMode(PS_ON_PIN, INPUT);
+    #endif
 
-  SERIAL_ERROR_START;
-  SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
+    SERIAL_ERROR_START;
+    SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
 
-  // FMC small patch to update the LCD before ending
-  sei();   // enable interrupts
+    // FMC small patch to update the LCD before ending
+    CRITICAL_SECTION_END;
+  }
   for (int i = 5; i--; lcd_update()) delay(200); // Wait a short time
-  cli();   // disable interrupts
-  suicide();
-  while (1) { /* Intentionally left empty */ } // Wait for reset
+  {
+    CRITICAL_SECTION_START;
+    suicide();
+    while (1) { /* Intentionally left empty */ } // Wait for reset
+    CRITICAL_SECTION_END;
+  }
 }
 
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
