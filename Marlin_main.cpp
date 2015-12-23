@@ -1116,9 +1116,14 @@ void setup_for_endstop_move() {
 
     // Print calibration results for plotting or manual frame adjustment.
     static void print_bed_level() {
-      for (int y = 0; y < AUTO_BED_LEVELING_GRID_POINTS; y++) {
+//    for (int y = 0; y < AUTO_BED_LEVELING_GRID_POINTS; y++) {
+      for (int y=AUTO_BED_LEVELING_GRID_POINTS-1; y>=0; y--) {
         for (int x = 0; x < AUTO_BED_LEVELING_GRID_POINTS; x++) {
-          SERIAL_PROTOCOL_F(bed_level[x][y], 2);
+
+          if (bed_level[x][y] >= 0.0)		// We need an extra space to make the columns line
+          	SERIAL_PROTOCOLCHAR(' ');	// up if the number is positive.
+
+          SERIAL_PROTOCOL_F(bed_level[x][y], 3);
           SERIAL_PROTOCOLCHAR(' ');
         }
         SERIAL_EOL;
