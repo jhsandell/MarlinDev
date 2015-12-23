@@ -1831,10 +1831,40 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
   void lcd_buttons_update() {
     #if ENABLED(NEWPANEL)
       uint8_t newbutton = 0;
-      if (READ(BTN_EN1) == 0) newbutton |= EN_A;
-      if (READ(BTN_EN2) == 0) newbutton |= EN_B;
+	  #if BTN_EN1 > 0
+        if (READ(BTN_EN1) == 0) newbutton |= EN_A;
+      #endif
+      #if BTN_EN2 > 0
+        if (READ(BTN_EN2) == 0) newbutton |= EN_B;
+      #endif
+	  
+	  
+      //#if ENABLED(RIGIDBOT_PANEL) || BTN_ENC > 0
+	  #if BTN_ENC > 0
+        millis_t now = millis();
+      #endif
+      #if ENABLED(RIGIDBOT_PANEL)
+        if (now > next_button_update_ms) {
+          if (READ(BTN_UP) == 0) {
+            encoderDiff = -1 * ENCODER_STEPS_PER_MENU_ITEM;
+            next_button_update_ms = now + 300;
+          }
+          else if (READ(BTN_DWN) == 0) {
+            encoderDiff = ENCODER_STEPS_PER_MENU_ITEM;
+            next_button_update_ms = now + 300;
+          }
+          else if (READ(BTN_LFT) == 0) {
+            encoderDiff = -1 * ENCODER_PULSES_PER_STEP;
+            next_button_update_ms = now + 300;
+          }
+          else if (READ(BTN_RT) == 0) {
+            encoderDiff = ENCODER_PULSES_PER_STEP;
+            next_button_update_ms = now + 300;
+          }
+        }
+      #endif
       #if BTN_ENC > 0
-        if (millis() > next_button_update_ms && READ(BTN_ENC) == 0) newbutton |= EN_C;
+        if (now > next_button_update_ms && READ(BTN_ENC) == 0) newbutton |= EN_C;
       #endif
       buttons = newbutton;
       #if ENABLED(LCD_HAS_SLOW_BUTTONS)
