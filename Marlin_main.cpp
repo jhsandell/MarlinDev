@@ -3984,6 +3984,10 @@ void process_next_command() {
         gcode_M42();
         break;
 
+      case 45: //M45 -Check pin status via gcode
+        gcode_M45();
+        break;
+
       #if ENABLED(M100_FREE_MEMORY_WATCHER)
         case 100:
           gcode_M100();
