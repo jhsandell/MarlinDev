@@ -2450,13 +2450,6 @@ inline void gcode_M114() {
 }
 
 /**
- * M115: Capabilities string
- */
-inline void gcode_M115() {
-  SERIAL_PROTOCOLPGM(MSG_M115_REPORT);
-}
-
-/**
  * M117: Set LCD Status Message
  */
 inline void gcode_M117() {

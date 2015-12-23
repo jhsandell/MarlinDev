@@ -2,11 +2,6 @@
 #define LANGUAGE_H
 
 #include "MarlinFirmware.h"
-#include "Version.h"
-
-#define LANGUAGE_CONCAT(M)       #M
-#define GENERATE_LANGUAGE_INCLUDE(M)  LANGUAGE_CONCAT(language_##M.h)
-
 
 // NOTE: IF YOU CHANGE LANGUAGE FILES OR MERGE A FILE WITH CHANGES
 //
@@ -41,8 +36,6 @@
   #define LANGUAGE_INCLUDE GENERATE_LANGUAGE_INCLUDE(en)
 #endif
 
-#define PROTOCOL_VERSION "1.0"
-
 #if MB(ULTIMAKER)|| MB(ULTIMAKER_OLD)|| MB(ULTIMAIN_2)
   #define MACHINE_NAME "Ultimaker"
   #define SOURCE_CODE_URL "https://github.com/Ultimaker/Marlin"
@@ -76,11 +69,6 @@
   #define UUID "00000000-0000-0000-0000-000000000000"
 #endif
 
-
-#define STRINGIFY_(n) #n
-#define STRINGIFY(n) STRINGIFY_(n)
-
-
 // Common LCD messages
 
   /* nothing here yet */
@@ -113,7 +101,6 @@
 #define MSG_INVALID_EXTRUDER                "Invalid extruder"
 #define MSG_INVALID_SOLENOID                "Invalid solenoid"
 #define MSG_ERR_NO_THERMISTORS              "No thermistors - no temperature"
-#define MSG_M115_REPORT                     "FIRMWARE_NAME:Marlin " DETAILED_BUILD_VERSION " SOURCE_CODE_URL:" SOURCE_CODE_URL " PROTOCOL_VERSION:" PROTOCOL_VERSION " MACHINE_TYPE:" MACHINE_NAME " EXTRUDER_COUNT:" STRINGIFY(EXTRUDERS) " UUID:" UUID "\n"
 #define MSG_COUNT_X                         " Count X: "
 #define MSG_ERR_KILLED                      "Printer halted. kill() called!"
 #define MSG_ERR_STOPPED                     "Printer stopped due to errors. Fix the error and use M999 to restart. (Temperature is reset. Set it after restarting)"

@@ -8,6 +8,9 @@
 
 #include "FirmwareCustomization.h"
 
+#define INCLUDE_BY_CLASS_AND_ID(C,I)   AS_STRING_(configurations/C/I/Customization.h)
+#define INCLUDE_BY_PATH(P)             AS_STRING_(P)
+
 // CONFIGURATION_H (for backward compatibility) is used as a flag to indicate that the customization entries have been provided
 
 #ifndef CONFIGURATION_H
