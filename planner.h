@@ -74,7 +74,6 @@ void plan_set_e_position(const float& e);
 
 extern millis_t minsegmenttime;
 extern float max_feedrate[NUM_AXIS]; // Max speeds in mm per minute
-extern float axis_steps_per_unit[NUM_AXIS];
 extern unsigned long max_acceleration_units_per_sq_second[NUM_AXIS]; // Use M201 to override by software
 extern float minimumfeedrate;
 extern float acceleration;         // Normal acceleration mm/s^2  DEFAULT ACCELERATION for all printing moves. M204 SXXXX

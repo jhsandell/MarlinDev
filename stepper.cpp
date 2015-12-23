@@ -35,6 +35,7 @@
 #endif
 #include "host_interface/host_io.h"
 #include "probe_management/probe_management.h"
+#include "unit_conversion.h"
 
 //===========================================================================
 //============================= public variables ============================

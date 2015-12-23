@@ -59,13 +59,14 @@
   #include "mesh_bed_leveling.h"
 #endif
 
+#include "unit_conversion.h"
+
 //===========================================================================
 //============================= public variables ============================
 //===========================================================================
 
 millis_t minsegmenttime;
 float max_feedrate[NUM_AXIS]; // Max speeds in mm per minute
-float axis_steps_per_unit[NUM_AXIS];
 unsigned long max_acceleration_units_per_sq_second[NUM_AXIS]; // Use M201 to override by software
 float minimumfeedrate;
 float acceleration;         // Normal acceleration mm/s^2  DEFAULT ACCELERATION for all printing moves. M204 SXXXX

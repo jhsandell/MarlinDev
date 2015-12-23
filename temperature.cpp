@@ -22,6 +22,7 @@
 #include "temperature.h"
 #include "messages/language.h"
 #include "Sd2PinMap.h"
+#include "unit_conversion.h"
 
 #if ENABLED(USE_WATCHDOG)
   #include "watchdog.h"
