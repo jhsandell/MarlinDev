@@ -108,20 +108,16 @@ static void lcd_status_screen();
 
   #define ENCODER_FEEDRATE_DEADZONE 10
 
-  #if DISABLED(LCD_I2C_VIKI)
-    #ifndef ENCODER_STEPS_PER_MENU_ITEM
-      #define ENCODER_STEPS_PER_MENU_ITEM 5
-    #endif
-    #ifndef ENCODER_PULSES_PER_STEP
-      #define ENCODER_PULSES_PER_STEP 1
-    #endif
-  #else
+  #if ENABLED(LCD_I2C_VIKI)
     #ifndef ENCODER_STEPS_PER_MENU_ITEM
       #define ENCODER_STEPS_PER_MENU_ITEM 2 // VIKI LCD rotary encoder uses a different number of steps per rotation
     #endif
-    #ifndef ENCODER_PULSES_PER_STEP
-      #define ENCODER_PULSES_PER_STEP 1
-    #endif
+  #endif
+  #ifndef ENCODER_STEPS_PER_MENU_ITEM
+    #define ENCODER_STEPS_PER_MENU_ITEM 5
+  #endif
+  #ifndef ENCODER_PULSES_PER_STEP
+    #define ENCODER_PULSES_PER_STEP 1
   #endif
 
   #ifndef BTN_ENC
@@ -889,10 +885,10 @@ static void lcd_move_e(
         case 1: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E2); break;
         #if EXTRUDERS > 2
           case 2: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E3); break;
-          #if EXTRUDERS > 3
-            case 3: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E4); break;
-          #endif //EXTRUDERS > 3
         #endif //EXTRUDERS > 2
+        #if EXTRUDERS > 3
+          case 3: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E4); break;
+        #endif //EXTRUDERS > 3
       }
     #endif //EXTRUDERS > 1
     lcd_implementation_drawedit(pos_label, ftostr31(current_position[E_AXIS]));
@@ -906,13 +902,13 @@ static void lcd_move_e(
 #if EXTRUDERS > 1
   static void lcd_move_e0() { lcd_move_e(0); }
   static void lcd_move_e1() { lcd_move_e(1); }
-  #if EXTRUDERS > 2
-    static void lcd_move_e2() { lcd_move_e(2); }
-    #if EXTRUDERS > 3
-      static void lcd_move_e3() { lcd_move_e(3); }
-    #endif
-  #endif
 #endif // EXTRUDERS > 1
+#if EXTRUDERS > 2
+  static void lcd_move_e2() { lcd_move_e(2); }
+#endif
+#if EXTRUDERS > 3
+  static void lcd_move_e3() { lcd_move_e(3); }
+#endif
 
 /**
  *
@@ -932,13 +928,13 @@ static void lcd_move_menu_axis() {
     #else
       MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E1, lcd_move_e0);
       MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E2, lcd_move_e1);
-      #if EXTRUDERS > 2
-        MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_e2);
-        #if EXTRUDERS > 3
-          MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_e3);
-        #endif
-      #endif
-    #endif // EXTRUDERS > 1
+    #endif
+    #if EXTRUDERS > 2
+      MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_e2);
+    #endif
+    #if EXTRUDERS > 3
+      MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_e3);
+    #endif
   }
   END_MENU();
 }
@@ -1026,13 +1022,13 @@ static void lcd_control_menu() {
   #if ENABLED(PID_PARAMS_PER_EXTRUDER)
     #if EXTRUDERS > 1
       COPY_AND_SCALE(1);
-      #if EXTRUDERS > 2
-        COPY_AND_SCALE(2);
-        #if EXTRUDERS > 3
-          COPY_AND_SCALE(3);
-        #endif //EXTRUDERS > 3
-      #endif //EXTRUDERS > 2
     #endif //EXTRUDERS > 1
+    #if EXTRUDERS > 2
+      COPY_AND_SCALE(2);
+    #endif //EXTRUDERS > 2
+    #if EXTRUDERS > 3
+      COPY_AND_SCALE(3);
+    #endif //EXTRUDERS > 3
   #endif //PID_PARAMS_PER_EXTRUDER
 
 #endif //PIDTEMP
@@ -1092,10 +1088,10 @@ static void lcd_control_temperature_menu() {
       PID_MENU_ITEMS(MSG_E2, 1);
       #if EXTRUDERS > 2
         PID_MENU_ITEMS(MSG_E3, 2);
-        #if EXTRUDERS > 3
-          PID_MENU_ITEMS(MSG_E4, 3);
-        #endif //EXTRUDERS > 3
       #endif //EXTRUDERS > 2
+      #if EXTRUDERS > 3
+        PID_MENU_ITEMS(MSG_E4, 3);
+      #endif //EXTRUDERS > 3
     #else //!PID_PARAMS_PER_EXTRUDER || EXTRUDERS == 1
       PID_MENU_ITEMS("", 0);
     #endif //!PID_PARAMS_PER_EXTRUDER || EXTRUDERS == 1
@@ -1222,13 +1218,13 @@ static void lcd_control_volumetric_menu() {
     #else //EXTRUDERS > 1
       MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float43, MSG_FILAMENT_DIAM MSG_DIAM_E1, &filament_size[0], 1.5, 3.25, calculate_volumetric_multipliers);
       MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float43, MSG_FILAMENT_DIAM MSG_DIAM_E2, &filament_size[1], 1.5, 3.25, calculate_volumetric_multipliers);
-      #if EXTRUDERS > 2
-        MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float43, MSG_FILAMENT_DIAM MSG_DIAM_E3, &filament_size[2], 1.5, 3.25, calculate_volumetric_multipliers);
-        #if EXTRUDERS > 3
-          MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float43, MSG_FILAMENT_DIAM MSG_DIAM_E4, &filament_size[3], 1.5, 3.25, calculate_volumetric_multipliers);
-        #endif //EXTRUDERS > 3
-      #endif //EXTRUDERS > 2
     #endif //EXTRUDERS > 1
+    #if EXTRUDERS > 2
+      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float43, MSG_FILAMENT_DIAM MSG_DIAM_E3, &filament_size[2], 1.5, 3.25, calculate_volumetric_multipliers);
+    #endif //EXTRUDERS > 2
+    #if EXTRUDERS > 3
+      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float43, MSG_FILAMENT_DIAM MSG_DIAM_E4, &filament_size[3], 1.5, 3.25, calculate_volumetric_multipliers);
+    #endif //EXTRUDERS > 3
   }
 
   END_MENU();
