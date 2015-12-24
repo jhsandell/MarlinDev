@@ -1,6 +1,6 @@
 #include "MarlinFirmware.h"
 #include "cardreader.h"
-#include "ultralcd.h"
+#include "display/display.h"
 #include "stepper.h"
 #include "temperature.h"
 #include "host_interface/host_io.h"

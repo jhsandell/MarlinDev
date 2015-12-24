@@ -18,8 +18,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ultralcd.h"
 #include "temperature.h"
+#include "display/display.h"
+#include "display/panel.h"
 #include "messages/language.h"
 #include "Sd2PinMap.h"
 #include "unit_conversion.h"

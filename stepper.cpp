@@ -26,7 +26,6 @@
 #include "stepper.h"
 #include "planner.h"
 #include "temperature.h"
-#include "ultralcd.h"
 #include "messages/language.h"
 #include "cardreader.h"
 #include "speed_lookuptable.h"
@@ -34,6 +33,7 @@
   #include <SPI.h>
 #endif
 #include "host_interface/host_io.h"
+#include "display/display.h"
 #include "probe_management/probe_management.h"
 #include "unit_conversion.h"
 

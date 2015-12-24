@@ -36,6 +36,7 @@
   #endif
 #endif // AUTO_BED_LEVELING_FEATURE
 
+#include "display/display.h"
 #if ENABLED(MESH_BED_LEVELING)
   #include "mesh_bed_leveling.h"
 #endif
