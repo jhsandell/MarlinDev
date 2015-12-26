@@ -69,10 +69,6 @@
   #define SOURCE_CODE_URL "https://github.com/MarlinFirmware/Marlin"
 #endif
 
-#ifndef DETAILED_BUILD_VERSION
-  #error BUILD_VERSION Information must be specified
-#endif
-
 #ifndef UUID
   #define UUID "00000000-0000-0000-0000-000000000000"
 #endif
