@@ -2,6 +2,7 @@
 #define LANGUAGE_H
 
 #include "MarlinFirmware.h"
+#include "Version.h"
 
 #define LANGUAGE_CONCAT(M)       #M
 #define GENERATE_LANGUAGE_INCLUDE(M)  LANGUAGE_CONCAT(language_##M.h)
@@ -39,6 +40,8 @@
 #ifndef LANGUAGE_INCLUDE
   #define LANGUAGE_INCLUDE GENERATE_LANGUAGE_INCLUDE(en)
 #endif
+
+#define PROTOCOL_VERSION "1.0"
 
 #if MB(ULTIMAKER)|| MB(ULTIMAKER_OLD)|| MB(ULTIMAIN_2)
   #define MACHINE_NAME "Ultimaker"
