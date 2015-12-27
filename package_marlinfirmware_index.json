@@ -1,7 +1,7 @@
 {
   "packages": [
     {
-      "name": "Marlin for IDE 1.6.7",
+      "name": "Marlin_for_IDE_1.6.7",
       "email": "rkw@dataplex.net",
       "help": {
         "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
@@ -9,7 +9,7 @@
       "maintainer": "Richard Wackerbarth",
       "platforms": [
         {
-          "name": "Marlin for IDE 1.6.7",
+          "name": "Marlin_for_IDE_1.6.7",
           "version": "0.0.1",
           "architecture": "avr",
           "archiveFileName": "MarlinPlatform-1.6.7-a.zip",
@@ -38,7 +38,7 @@
             },
             {
               "name": "versioning",
-              "packager": "Marlin",
+              "packager": "Marlin_for_IDE_1.6.7",
               "version": "0.0.1"
             }
           ],
