@@ -1,0 +1,180 @@
+{
+  "packages": [
+    {
+      "name": "Marlin for IDE 1.6.7",
+      "email": "rkw@dataplex.net",
+      "help": {
+        "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
+      },
+      "maintainer": "Richard Wackerbarth",
+      "platforms": [
+        {
+          "name": "Marlin for IDE 1.6.7",
+          "version": "0.0.1",
+          "architecture": "avr",
+          "archiveFileName": "MarlinPlatform-1.6.7-a.zip",
+          "boards": [
+            { "name": "ATMega2560" },
+            { "name": "AT90USB646" },
+            { "name": "AT90USB1286" },
+            { "name": "RAMBo" }
+          ],
+          "category": "Contributed",
+          "checksum": "SHA-256:9534e5a2d25bf1b2bd2a3db9fb893faa3fcb097ebe2cc4f5c0b36cf0bcc5526b",
+          "help": {
+            "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
+          },
+          "size": "1856553",
+          "toolsDependencies": [
+            {
+              "name": "avr-gcc",
+              "packager": "arduino",
+              "version": "4.8.1-arduino5"
+            },
+            {
+              "name": "avrdude",
+              "packager": "arduino",
+              "version": "6.0.1-arduino5"
+            },
+            {
+              "name": "versioning",
+              "packager": "Marlin",
+              "version": "0.0.1"
+            }
+          ],
+          "url": "https://github.com/Wackerbarth/MarlinDev/archive/MarlinPlatform-1.6.7-a.zip"
+        }
+      ],
+      "tools": [
+        {
+          "name": "versioning",
+          "version": "0.0.1",
+          "systems": [
+            {
+              "host": "x86_64-apple-darwin",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            },
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            },
+            {
+              "host": "i686-pc-linux-gnu",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            }
+          ]
+        }
+      ],
+      "websiteURL": "https://github.com/MarlinFirmware/MarlinDev"
+    },
+    {
+      "name": "Marlin for IDE 1.6.6",
+      "email": "rkw@dataplex.net",
+      "help": {
+        "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
+      },
+      "maintainer": "Richard Wackerbarth",
+      "platforms": [
+        {
+          "name": "Marlin for IDE 1.6.6",
+          "version": "1.6.6",
+          "architecture": "avr",
+          "archiveFileName": "MarlinPlatform-1.6.6.zip",
+          "boards": [
+            { "name": "ATMega2560" },
+            { "name": "AT90USB646" },
+            { "name": "AT90USB1286" }
+          ],
+          "category": "Contributed",
+          "checksum": "SHA-256:4a9042de021559b0774f793671b1e64756b2be26a553d477540890939b40e1f2",
+          "help": {
+            "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
+          },
+          "size": "1836804",
+          "toolsDependencies": [
+            {
+              "name": "avr-gcc",
+              "packager": "arduino",
+              "version": "4.8.1-arduino5"
+            },
+            {
+              "name": "avrdude",
+              "packager": "arduino",
+              "version": "6.0.1-arduino5"
+            }
+          ],
+          "url": "https://github.com/MarlinFirmware/MarlinDev/archive/MarlinPlatform-1.6.6.zip"
+       },
+       {
+          "name": "Marlin for IDE 1.6.6 with eclipse",
+          "version": "1.6.6-eclipse",
+          "architecture": "avr",
+          "archiveFileName": "MarlinPlatform-1.0.6.zip",
+          "boards": [
+            { "name": "ATMega2560" },
+            { "name": "AT90USB646" },
+            { "name": "AT90USB1286" }
+          ],
+          "category": "Contributed",
+          "checksum": "SHA-256:e7e759ff953f2ef7a3537cd531934e8a29f48fc33e27aea7fac08e8c15ba096b",
+          "help": {
+            "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
+          },
+          "size": "1836804",
+          "toolsDependencies": [
+            {
+              "name": "avr-gcc",
+              "packager": "arduino",
+              "version": "4.8.1-arduino5"
+            },
+            {
+              "name": "avrdude",
+              "packager": "arduino",
+              "version": "6.0.1-arduino5"
+            }
+          ],
+          "url": "https://github.com/MarlinFirmware/MarlinDev/archive/MarlinPlatform-1.0.6.zip"
+        }
+      ],
+      "tools": [
+        {
+          "name": "versioning",
+          "version": "0.0.1",
+          "systems": [
+            {
+              "host": "x86_64-apple-darwin",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            },
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            },
+            {
+              "host": "i686-pc-linux-gnu",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            }
+          ]
+        }
+      ],
+      "websiteURL": "https://github.com/MarlinFirmware/MarlinDev"
+    }
+  ]
+}
