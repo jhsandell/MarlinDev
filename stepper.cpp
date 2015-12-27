@@ -71,9 +71,9 @@ volatile static unsigned long step_events_completed; // The number of step event
 static long acceleration_time, deceleration_time;
 //static unsigned long accelerate_until, decelerate_after, acceleration_rate, initial_rate, final_rate, nominal_rate;
 static unsigned short acc_step_rate; // needed for deceleration start point
-static uint8_t step_loops;
-static uint8_t step_loops_nominal;
+static char step_loops;
 static unsigned short OCR1A_nominal;
+static unsigned short step_loops_nominal;
 
 volatile long endstops_trigsteps[3] = { 0 };
 volatile long endstops_stepsTotal, endstops_stepsDone;
@@ -393,7 +393,6 @@ inline void update_endstops() {
   #endif
       { // z -direction
         #if HAS_Z_MIN
-
           #if ENABLED(Z_DUAL_ENDSTOPS)
             SET_ENDSTOP_BIT(Z, MIN);
             #if HAS_Z2_MIN
@@ -411,18 +410,20 @@ inline void update_endstops() {
                 step_events_completed = current_block->step_event_count;
             }
           #else // !Z_DUAL_ENDSTOPS
-
-            UPDATE_ENDSTOP(Z, MIN);
-
+               UPDATE_ENDSTOP(Z, MIN);
           #endif // !Z_DUAL_ENDSTOPS
         #endif // Z_MIN_PIN
 
         #if ENABLED(Z_MIN_PROBE_ENDSTOP)
-          UPDATE_ENDSTOP(Z, MIN_PROBE);
-
-          if (TEST_ENDSTOP(Z_MIN_PROBE)) {
-            endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
-            endstop_hit_bits |= BIT(Z_MIN_PROBE);
+          if (z_probe_is_active)
+          {
+            SET_ENDSTOP_BIT(Z, MIN_PROBE);
+            if (TEST_ENDSTOP(Z_MIN_PROBE))
+            {
+              endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
+              endstop_hit_bits |= BIT(Z_MIN_PROBE);
+              step_events_completed = current_block->step_event_count; \
+            }
           }
         #endif
       }
@@ -712,9 +713,10 @@ ISR(TIMER1_COMPA_vect) {
 
       #if ENABLED(ADVANCE)
 
-        advance += advance_rate * step_loops;
-        //NOLESS(advance, current_block->advance);
-
+        for (int8_t i = 0; i < step_loops; i++) {
+          advance += advance_rate;
+        }
+        //if (advance > current_block->advance) advance = current_block->advance;
         // Do E steps + advance steps
         e_steps[current_block->active_extruder] += ((advance >> 8) - old_advance);
         old_advance = advance >> 8;
@@ -724,26 +726,29 @@ ISR(TIMER1_COMPA_vect) {
     else if (step_events_completed > (unsigned long)current_block->decelerate_after) {
       MultiU24X32toH16(step_rate, deceleration_time, current_block->acceleration_rate);
 
-      if (step_rate <= acc_step_rate) { // Still decelerating?
-        step_rate = acc_step_rate - step_rate;
-        NOLESS(step_rate, current_block->final_rate);
+      if (step_rate > acc_step_rate) { // Check step_rate stays positive
+        step_rate = current_block->final_rate;
       }
-      else
+      else {
+        step_rate = acc_step_rate - step_rate; // Decelerate from aceleration end point.
+      }
+
+      // lower limit
+      if (step_rate < current_block->final_rate)
         step_rate = current_block->final_rate;
 
       // step_rate to timer interval
       timer = calc_timer(step_rate);
       OCR1A = timer;
       deceleration_time += timer;
-
       #if ENABLED(ADVANCE)
-        advance -= advance_rate * step_loops;
-        NOLESS(advance, final_advance);
-
+        for (int8_t i = 0; i < step_loops; i++) {
+          advance -= advance_rate;
+        }
+        if (advance < final_advance) advance = final_advance;
         // Do E steps + advance steps
-        uint32_t advance_whole = advance >> 8;
-        e_steps[current_block->active_extruder] += advance_whole - old_advance;
-        old_advance = advance_whole;
+        e_steps[current_block->active_extruder] += ((advance >> 8) - old_advance);
+        old_advance = advance >> 8;
       #endif //ADVANCE
     }
     else {
