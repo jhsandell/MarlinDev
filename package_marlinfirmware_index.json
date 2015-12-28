@@ -9,6 +9,42 @@
       "maintainer": "Richard Wackerbarth",
       "platforms": [
         {
+          "version": "0.0.2",
+          "url": "https://github.com/MarlinFirmware/MarlinDev/archive/MarlinPlatform-1.6.7-b.zip",
+          "archiveFileName": "MarlinPlatform-1.6.7-b.zip",
+          "size": "1836466",
+          "checksum": "SHA-256:ea9333a67a8b6475f7168ca14895cf9b8bf0caef73fd739d4bff6c3da3401c0a",
+          "name": "Marlin_for_IDE_1.6.7",
+          "architecture": "avr",
+          "boards": [
+            { "name": "ATMega2560" },
+            { "name": "AT90USB646" },
+            { "name": "AT90USB1286" },
+            { "name": "RAMBo" }
+          ],
+          "category": "Contributed",
+          "help": {
+            "online": "https://github.com/MarlinFirmware/MarlinDev/wiki"
+          },
+          "toolsDependencies": [
+            {
+              "name": "avr-gcc",
+              "packager": "arduino",
+              "version": "4.8.1-arduino5"
+            },
+            {
+              "name": "avrdude",
+              "packager": "arduino",
+              "version": "6.0.1-arduino5"
+            },
+            {
+              "name": "versioning",
+              "packager": "Marlin_for_IDE_1.6.7",
+              "version": "0.0.1"
+            }
+          ]
+        },
+        {
           "name": "Marlin_for_IDE_1.6.7",
           "version": "0.0.1",
           "architecture": "avr",
