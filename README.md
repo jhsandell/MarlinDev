@@ -3,7 +3,7 @@
  Documentation has moved to the [wiki](https://github.com/MarlinFirmware/MarlinDev/wiki).
 
 ## This is the source code which produces the Marlin Firmware
-Complete instructions for setting up the build environment and configuring the firmware can be found at the [wiki](https://github.com/MarlinFirmware/MarlinDev/wiki).  In order to build the firmware, you will also need to setup the build environment. The official build environment is based on the [Arduino IDE 1.6.6](https://www.arduino.cc/Main/Software).
+Complete instructions for setting up the build environment and configuring the firmware can be found at the [wiki](https://github.com/MarlinFirmware/MarlinDev/wiki).  In order to build the firmware, you will also need to setup the build environment. The official build environment is based on the [Arduino IDE 1.6.7](https://www.arduino.cc/Main/Software).
 
 ## Development Only
 
