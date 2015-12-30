@@ -87,6 +87,13 @@
           "version": "0.0.1",
           "systems": [
             {
+              "host": "i686-mingw32",
+              "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
+              "archiveFileName": "versioning.tar.gz",
+              "checksum": "SHA-256:19743747acd072ed34fa2fde96f78aa0757cf111072443e69b37f0f75049d140",
+              "size": "888"
+            },
+            {
               "host": "x86_64-apple-darwin",
               "url": "http://github.com/Wackerbarth/MarlinDev/archive/versioning.tar.gz",
               "archiveFileName": "versioning.tar.gz",
