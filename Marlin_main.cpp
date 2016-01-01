@@ -3553,6 +3553,12 @@ void process_next_command() {
         gcode_G28();
         break;
 
+      #if ENABLED(HAS_LEVELING)
+        case 29: // G29 Detailed Z probe, probes the bed at 3 or more points.
+          gcode_G29();
+          break;
+      #endif
+
       #if ENABLED(AUTO_BED_LEVELING_FEATURE)
 
         #if DISABLED(Z_PROBE_SLED)
