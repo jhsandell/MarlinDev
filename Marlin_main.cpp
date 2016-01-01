@@ -3666,6 +3666,10 @@ void process_next_command() {
           break;
       #endif
 
+      case 28: // G28: Home all axes, one at a time
+        gcode_G28();
+        break;
+
       #if ENABLED(AUTO_BED_LEVELING_FEATURE)
 
         #if DISABLED(Z_PROBE_SLED)
