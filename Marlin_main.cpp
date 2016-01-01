@@ -115,6 +115,7 @@
  * G32 - Undock sled (Z_PROBE_SLED only)
  * G90 - Use Absolute Coordinates
  * G91 - Use Relative Coordinates
+ * G92 - Set current position to coordinates given
  *
  * "M" Codes
  *
@@ -3583,6 +3584,10 @@ void process_next_command() {
         break;
       case 91: // G91
         relative_mode = true;
+        break;
+
+      case 92: // G92
+        gcode_G92();
         break;
     }
     break;
