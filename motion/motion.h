@@ -1,3 +1,7 @@
+#if HAS_SERVOS
+  #include "servo.h"
+  extern Servo servo[];
+#endif
 extern float feedrate, saved_feedrate;
 extern float current_position[NUM_AXIS];
 extern float destination[NUM_AXIS];
@@ -23,8 +27,9 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
 
 // These should be moved into the movement section
 
-extern void prepare_move_raw();
-extern void run_z_probe();
+void prepare_move_raw();
+void enable_endstops(bool check); // Enable/disable endstop checking
+void run_z_probe();
 
 // Block until all buffered steps are executed
 void st_synchronize();
@@ -40,31 +45,21 @@ void endstops_hit_on_purpose(); //avoid creation of the message, i.e. after homi
    */
   void plan_buffer_line(float x, float y, float z, const float& e, float feed_rate, const uint8_t extruder);
 
-  /**
-   * Set the planner positions. Used for G92 instructions.
-   * Multiplies by axis_steps_per_unit[] to set stepper positions.
-   * Clears previous speed values.
-   */
-  void plan_set_position(float x, float y, float z, const float& e);
-
 #else
 
   void plan_buffer_line(const float& x, const float& y, const float& z, const float& e, float feed_rate, const uint8_t extruder);
-  void plan_set_position(const float& x, const float& y, const float& z, const float& e);
 
 #endif // AUTO_BED_LEVELING_FEATURE || MESH_BED_LEVELING
 
+#include "planner.h"
 inline void sync_plan_position() {
   plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
 }
-#if ENABLED(DELTA) || ENABLED(SCARA)
-  inline void sync_plan_position_delta() {
-    calculate_delta(current_position);
-    plan_set_position(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], current_position[E_AXIS]);
-  }
-#endif
 
 inline void line_to_current_position() {
   plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate / 60, active_extruder);
 }
 
+// Homing
+#define HOMEAXIS(LETTER) homeaxis(LETTER##_AXIS)
+extern void homeaxis(AxisEnum axis);

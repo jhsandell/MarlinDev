@@ -77,3 +77,48 @@ void do_blocking_move_to(float x, float y, float z) {
 #endif
 }
 
+static int saved_feedrate_multiplier;
+
+void setup_for_endstop_move() {
+  saved_feedrate = feedrate;
+  saved_feedrate_multiplier = feedrate_multiplier;
+  feedrate_multiplier = 100;
+  refresh_cmd_timeout();
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (marlin_debug_flags & DEBUG_LEVELING) {
+      SERIAL_ECHOLNPGM("setup_for_endstop_move > enable_endstops(true)");
+    }
+  #endif
+  enable_endstops(true);
+}
+
+void clean_up_after_endstop_move() {
+  #if ENABLED(ENDSTOPS_ONLY_FOR_HOMING)
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (marlin_debug_flags & DEBUG_LEVELING) {
+        SERIAL_ECHOLNPGM("clean_up_after_endstop_move > ENDSTOPS_ONLY_FOR_HOMING > enable_endstops(false)");
+      }
+    #endif
+    enable_endstops(false);
+  #endif
+  feedrate = saved_feedrate;
+  feedrate_multiplier = saved_feedrate_multiplier;
+  refresh_cmd_timeout();
+}
+
+#if ENABLED(DELTA)
+  /**
+   * Calculate delta, start a line, and set current_position to destination
+   */
+  void prepare_move_raw() {
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (marlin_debug_flags & DEBUG_LEVELING) {
+        print_xyz("prepare_move_raw > destination", destination);
+      }
+    #endif
+    refresh_cmd_timeout();
+    calculate_delta(destination);
+    plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], destination[E_AXIS], (feedrate / 60) * (feedrate_multiplier / 100.0), active_extruder);
+    set_current_to_destination();
+  }
+#endif
