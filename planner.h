@@ -68,6 +68,7 @@ void check_axes_activity();
 
 void plan_set_e_position(const float& e);
 
+
 //===========================================================================
 //============================= public variables ============================
 //===========================================================================
@@ -93,5 +94,18 @@ extern unsigned long axis_steps_per_sqr_second[NUM_AXIS];
 #endif
 
 void reset_acceleration_rates();
+
+extern float destination[NUM_AXIS];
+extern float feedrate;
+
+inline void line_to_z(float zPosition) {
+  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate / 60, active_extruder);
+}
+inline void line_to_destination(float mm_m) {
+  plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], mm_m / 60, active_extruder);
+}
+inline void line_to_destination() {
+  line_to_destination(feedrate);
+}
 
 #endif // PLANNER_H
