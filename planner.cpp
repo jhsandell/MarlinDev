@@ -494,10 +494,12 @@ float junction_deviation = 0.1;
   // Rest here until there is room in the buffer.
   while (block_buffer_tail == next_buffer_head) idle();
 
-  #if ENABLED(MESH_BED_LEVELING)
-    if (mbl.active) z += mbl.get_z(x, y);
-  #elif ENABLED(AUTO_BED_LEVELING_FEATURE)
-    apply_rotation_xyz(plan_bed_level_matrix, x, y, z);
+  #if DISABLED(DELTA)
+    #if ENABLED(MESH_BED_LEVELING)
+      if (mbl.active) z += mbl.get_z(x, y);
+    #elif ENABLED(AUTO_BED_LEVELING_FEATURE)
+      apply_rotation_xyz(plan_bed_level_matrix, x, y, z);
+    #endif
   #endif
 
   // The target position of the tool in absolute steps
