@@ -128,7 +128,7 @@
 #endif
 
 
-#define XY_TRAVEL_SPEED 8000         // X and Y axis travel speed between probes, in mm/min.
+#define XY_TRAVEL_SPEED 1800         // X and Y axis travel speed between probes, in mm/min.
 
 #define Z_RAISE_BEFORE_PROBING 100    // How much the Z axis will be raised before traveling to the first probing point.
 #ifndef Z_RAISE_BETWEEN_PROBINGS
@@ -195,7 +195,7 @@
 
 // delta speeds must be the same on xyz
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {XYZ_STEPS, XYZ_STEPS, XYZ_STEPS, 184.8}
-#define DEFAULT_MAX_FEEDRATE          {200, 200, 200, 200}    // (mm/sec)
+#define DEFAULT_MAX_FEEDRATE          {50, 50, 50, 200}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,9000,9000}    // X, Y, Z, E maximum start speed for accelerated moves.
 
 // Custom M code points

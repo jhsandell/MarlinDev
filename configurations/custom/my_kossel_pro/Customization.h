@@ -21,3 +21,5 @@
 
 #define  VENDOR OpenBeam
 #define  MODEL KosselPro
+
+#define DEBUG_LEVELING_FEATURE

@@ -22,4 +22,6 @@
 
 #define DELTA_DIAGONAL_ROD 300.0 // mm
 
+#define DEBUG_LEVELING_FEATURE
+
 #include "configurations/transitional_default_configurations/delta/kossel_pro/Configuration.h"
