@@ -4113,18 +4113,22 @@ void clamp_to_software_endstops(float target[3]) {
 
   void calculate_delta(float cartesian[3]) {
 
-    delta[TOWER_1] = sqrt(delta_diagonal_rod_2_tower_1
-                          - sq(delta_tower1_x - cartesian[X_AXIS])
-                          - sq(delta_tower1_y - cartesian[Y_AXIS])
-                         ) + cartesian[Z_AXIS];
-    delta[TOWER_2] = sqrt(delta_diagonal_rod_2_tower_2
-                          - sq(delta_tower2_x - cartesian[X_AXIS])
-                          - sq(delta_tower2_y - cartesian[Y_AXIS])
-                         ) + cartesian[Z_AXIS];
-    delta[TOWER_3] = sqrt(delta_diagonal_rod_2_tower_3
-                          - sq(delta_tower3_x - cartesian[X_AXIS])
-                          - sq(delta_tower3_y - cartesian[Y_AXIS])
-                         ) + cartesian[Z_AXIS];
+    float t = delta_diagonal_rod_2_tower_1
+              - sq(delta_tower1_x - cartesian[X_AXIS])
+              - sq(delta_tower1_y - cartesian[Y_AXIS]);
+    delta[TOWER_1] = cartesian[Z_AXIS] + (t > 25 ? sqrt(t) : 0.0);
+
+    t = delta_diagonal_rod_2_tower_2
+              - sq(delta_tower2_x - cartesian[X_AXIS])
+              - sq(delta_tower2_y - cartesian[Y_AXIS]);
+    delta[TOWER_2] = cartesian[Z_AXIS] + (t > 25 ? sqrt(t) : 0.0);
+
+    t = delta_diagonal_rod_2_tower_3
+              - sq(delta_tower3_x - cartesian[X_AXIS])
+              - sq(delta_tower3_y - cartesian[Y_AXIS]);
+    delta[TOWER_3] = cartesian[Z_AXIS] + (t > 25 ? sqrt(t) : 0.0);
+
+
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (marlin_debug_flags & DEBUG_LEVELING) {
         SERIAL_ECHOPGM("cartesian x="); SERIAL_ECHO(cartesian[X_AXIS]);
