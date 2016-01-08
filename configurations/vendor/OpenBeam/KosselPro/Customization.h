@@ -2,6 +2,9 @@
 // tested on 2015-05-19 by @Wackerbarth
 // using Arduino 1.6.5 (Mac)
 
+// FEATURES
+#define AUTO_BED_LEVELING_FEATURE
+
 // Based on the 1.1 MOTHERBOARD descriptors
 #define MOTHERBOARD BOARD_BRAINWAVE_PRO
 
@@ -67,12 +70,14 @@
 // For direct drive extruder
 #define INVERT_E0_DIR true
 
+#define USE_PROBE
+
 //===========================================================================
-//============================ Bed Leveling =================================
+//========================== Bed Tilt Compensation ==========================
 //===========================================================================
 
-#ifndef DELTA_PROBABLE_RADIUS
-  #define DELTA_PROBABLE_RADIUS (DELTA_PRINTABLE_RADIUS-25)
+#ifndef DELTA_PROBEABLE_RADIUS
+  #define DELTA_PROBEABLE_RADIUS (DELTA_PRINTABLE_RADIUS-25)
 #endif
 #ifndef AUTO_BED_LEVELING_GRID_POINTS
   #define AUTO_BED_LEVELING_GRID_POINTS 7
@@ -92,11 +97,14 @@
   #define Z_RAISE_BEFORE_HOMING 4       // (in mm) Raise Z axis before homing (G28) for Z probe clearance.
 #endif
 
-#define XY_TRAVEL_SPEED 8000         // X and Y axis travel speed between probes, in mm/min.
+#define XY_TRAVEL_SPEED 8000            // X and Y axis travel speed between probes, in mm/min.
 
-#define Z_RAISE_BEFORE_PROBING 100  // How much the Z axis will be raised before traveling to the first probing point.
+#ifndef Z_RAISE_BEFORE_PROBING
+  #define Z_RAISE_BEFORE_PROBING 40   // How much the Z axis will be raised before traveling to the first probing point.
+#endif
+
 #ifndef Z_RAISE_BETWEEN_PROBINGS
-  #define Z_RAISE_BETWEEN_PROBINGS 5  // How much the Z axis will be raised when traveling from between next probing points.
+  #define Z_RAISE_BETWEEN_PROBINGS 15   // How much the Z axis will be raised when traveling from between next probing points.
 #endif
 #ifndef Z_RAISE_AFTER_PROBING
   #define Z_RAISE_AFTER_PROBING 15    // How much the Z axis will be raised after the last probing point.
@@ -109,20 +117,27 @@
 #define Z_PROBE_ALLEN_KEY_DEPLOY_1_FEEDRATE HOMING_FEEDRATE_XYZ
 #define Z_PROBE_ALLEN_KEY_DEPLOY_2_X -110.00 // Move outward to position deploy pin to the left of the arm
 #define Z_PROBE_ALLEN_KEY_DEPLOY_2_Y -125.00
-#define Z_PROBE_ALLEN_KEY_DEPLOY_2_Z 100.0
+#define Z_PROBE_ALLEN_KEY_DEPLOY_2_Z Z_PROBE_ALLEN_KEY_DEPLOY_1_Z
 #define Z_PROBE_ALLEN_KEY_DEPLOY_2_FEEDRATE HOMING_FEEDRATE_XYZ
 #define Z_PROBE_ALLEN_KEY_DEPLOY_3_X 45.00 // Move right to trigger deploy pin
-#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Y -125.00
-#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Z 100.0
+#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Y Z_PROBE_ALLEN_KEY_DEPLOY_2_Y
+#define Z_PROBE_ALLEN_KEY_DEPLOY_3_Z Z_PROBE_ALLEN_KEY_DEPLOY_2_Z
 #define Z_PROBE_ALLEN_KEY_DEPLOY_3_FEEDRATE (HOMING_FEEDRATE_XYZ/2)
 
-#define Z_PROBE_ALLEN_KEY_STOW_1_X 36.00 // Line up with bed retaining clip
-#define Z_PROBE_ALLEN_KEY_STOW_1_Y -122.00
+ // Line up with bed retaining clip
+#ifndef Z_PROBE_ALLEN_KEY_STOW_1_X
+  #define Z_PROBE_ALLEN_KEY_STOW_1_X 34.00
+#endif
+#ifndef Z_PROBE_ALLEN_KEY_STOW_1_Y
+  #define Z_PROBE_ALLEN_KEY_STOW_1_Y -123.00
+#endif
 #define Z_PROBE_ALLEN_KEY_STOW_1_Z 75.0
 #define Z_PROBE_ALLEN_KEY_STOW_1_FEEDRATE HOMING_FEEDRATE_XYZ
-#define Z_PROBE_ALLEN_KEY_STOW_2_X 36.00 // move down to retract probe
-#define Z_PROBE_ALLEN_KEY_STOW_2_Y -122.00
-#define Z_PROBE_ALLEN_KEY_STOW_2_Z 25.0
+#define Z_PROBE_ALLEN_KEY_STOW_2_X Z_PROBE_ALLEN_KEY_STOW_1_X // move down to retract probe
+#define Z_PROBE_ALLEN_KEY_STOW_2_Y Z_PROBE_ALLEN_KEY_STOW_1_Y
+#ifndef Z_PROBE_ALLEN_KEY_STOW_2_Z
+  #define Z_PROBE_ALLEN_KEY_STOW_2_Z 0.0
+#endif
 #define Z_PROBE_ALLEN_KEY_STOW_2_FEEDRATE (HOMING_FEEDRATE_XYZ/2)
 #define Z_PROBE_ALLEN_KEY_STOW_3_X 0.0  // return to 0,0,100
 #define Z_PROBE_ALLEN_KEY_STOW_3_Y 0.0
@@ -146,6 +161,8 @@
 #define Z_PROBE_OFFSET_RANGE_MIN -15
 #define Z_PROBE_OFFSET_RANGE_MAX -5
 
-#define SDSUPPORT // Enable SD Card Support in Hardware Console
+#define SDSUPPORT
+
+#define EEPROM_SETTINGS
 
 #include INCLUDE_BY_CLASS_AND_ID(design,kossel)

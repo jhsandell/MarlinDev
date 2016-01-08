@@ -50,7 +50,7 @@
 //============================ Bed Leveling =================================
 //===========================================================================
 
-#define DELTA_PROBABLE_RADIUS (DELTA_PRINTABLE_RADIUS - 10)
+#define DELTA_PROBEABLE_RADIUS (DELTA_PRINTABLE_RADIUS - 10)
 #define AUTO_BED_LEVELING_GRID_POINTS 9
 
 // Offsets to the Z probe relative to the nozzle tip.
