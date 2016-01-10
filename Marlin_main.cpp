@@ -270,7 +270,6 @@ static char command_queue[BUFSIZE][MAX_CMD_SIZE];
 const float homing_feedrate[] = HOMING_FEEDRATE;
 bool axis_relative_modes[] = AXIS_RELATIVE_MODES;
 int feedrate_multiplier = 100; //100->1 200->2
-int saved_feedrate_multiplier;
 int extruder_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
 bool volumetric_enabled = false;
 float filament_size[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(DEFAULT_NOMINAL_FILAMENT_DIA);
@@ -1028,123 +1027,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 
 #endif //DUAL_X_CARRIAGE
 
-void setup_for_endstop_move() {
-  saved_feedrate = feedrate;
-  saved_feedrate_multiplier = feedrate_multiplier;
-  feedrate_multiplier = 100;
-  refresh_cmd_timeout();
-  #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (marlin_debug_flags & DEBUG_LEVELING) {
-      SERIAL_ECHOLNPGM("setup_for_endstop_move > enable_endstops(true)");
-    }
-  #endif
-  enable_endstops(true);
-}
-
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-
-  #if ENABLED(DELTA)
-    /**
-     * Calculate delta, start a line, and set current_position to destination
-     */
-    void prepare_move_raw() {
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (marlin_debug_flags & DEBUG_LEVELING) {
-          print_xyz("prepare_move_raw > destination", destination);
-        }
-      #endif
-      refresh_cmd_timeout();
-      calculate_delta(destination);
-      plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], destination[E_AXIS], (feedrate / 60) * (feedrate_multiplier / 100.0), active_extruder);
-      set_current_to_destination();
-    }
-  #endif
-
-  void clean_up_after_endstop_move() {
-    #if ENABLED(ENDSTOPS_ONLY_FOR_HOMING)
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (marlin_debug_flags & DEBUG_LEVELING) {
-          SERIAL_ECHOLNPGM("clean_up_after_endstop_move > ENDSTOPS_ONLY_FOR_HOMING > enable_endstops(false)");
-        }
-      #endif
-      enable_endstops(false);
-    #endif
-    feedrate = saved_feedrate;
-    feedrate_multiplier = saved_feedrate_multiplier;
-    refresh_cmd_timeout();
-  }
-
-  #if ENABLED(DELTA)
-
-    /**
-     * All DELTA leveling in the Marlin uses NONLINEAR_BED_LEVELING
-     */
-
-    static void extrapolate_one_point(int x, int y, int xdir, int ydir) {
-      if (bed_level[x][y] != 0.0) {
-        return;  // Don't overwrite good values.
-      }
-      float a = 2 * bed_level[x + xdir][y] - bed_level[x + xdir * 2][y]; // Left to right.
-      float b = 2 * bed_level[x][y + ydir] - bed_level[x][y + ydir * 2]; // Front to back.
-      float c = 2 * bed_level[x + xdir][y + ydir] - bed_level[x + xdir * 2][y + ydir * 2]; // Diagonal.
-      float median = c;  // Median is robust (ignores outliers).
-      if (a < b) {
-        if (b < c) median = b;
-        if (c < a) median = a;
-      }
-      else {  // b <= a
-        if (c < b) median = b;
-        if (a < c) median = a;
-      }
-      bed_level[x][y] = median;
-    }
-
-    // Fill in the unprobed points (corners of circular print surface)
-    // using linear extrapolation, away from the center.
-    static void extrapolate_unprobed_bed_level() {
-      int half = (AUTO_BED_LEVELING_GRID_POINTS - 1) / 2;
-      for (int y = 0; y <= half; y++) {
-        for (int x = 0; x <= half; x++) {
-          if (x + y < 3) continue;
-          extrapolate_one_point(half - x, half - y, x > 1 ? +1 : 0, y > 1 ? +1 : 0);
-          extrapolate_one_point(half + x, half - y, x > 1 ? -1 : 0, y > 1 ? +1 : 0);
-          extrapolate_one_point(half - x, half + y, x > 1 ? +1 : 0, y > 1 ? -1 : 0);
-          extrapolate_one_point(half + x, half + y, x > 1 ? -1 : 0, y > 1 ? -1 : 0);
-        }
-      }
-    }
-
-    // Print calibration results for plotting or manual frame adjustment.
-    static void print_bed_level() {
-//    for (int y = 0; y < AUTO_BED_LEVELING_GRID_POINTS; y++) {
-      for (int y=AUTO_BED_LEVELING_GRID_POINTS-1; y>=0; y--) {
-        for (int x = 0; x < AUTO_BED_LEVELING_GRID_POINTS; x++) {
-
-          if (bed_level[x][y] >= 0.0)		// We need an extra space to make the columns line
-          	SERIAL_PROTOCOLCHAR(' ');	// up if the number is positive.
-
-          SERIAL_PROTOCOL_F(bed_level[x][y], 3);
-          SERIAL_PROTOCOLCHAR(' ');
-        }
-        SERIAL_EOL;
-      }
-    }
-
-    // Reset calibration results to zero.
-    void reset_bed_level() {
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (marlin_debug_flags & DEBUG_LEVELING) {
-          SERIAL_ECHOLNPGM("reset_bed_level");
-        }
-      #endif
-      for (int y = 0; y < AUTO_BED_LEVELING_GRID_POINTS; y++) {
-        for (int x = 0; x < AUTO_BED_LEVELING_GRID_POINTS; x++) {
-          bed_level[x][y] = 0.0;
-        }
-      }
-    }
-
-  #endif // DELTA
 
   #if HAS_SERVO_ENDSTOPS && DISABLED(Z_PROBE_SLED)
 
