@@ -943,6 +943,13 @@ void st_init() {
     #endif
   #endif
 
+  #if HAS_Z2_MIN
+    SET_INPUT(Z2_MIN_PIN);
+    #if ENABLED(ENDSTOPPULLUP_ZMIN)
+      WRITE(Z2_MIN_PIN,HIGH);
+    #endif
+  #endif
+
   #if HAS_X_MAX
     SET_INPUT(X_MAX_PIN);
     #if ENABLED(ENDSTOPPULLUP_XMAX)
