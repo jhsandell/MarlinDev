@@ -80,6 +80,7 @@
 
 // Access to motion management
 #include "motion/motion.h"
+#include "movement.h"
 
 // Some routines used for debugging
 #include "debug_only_routines.h"
