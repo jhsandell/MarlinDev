@@ -8,7 +8,7 @@
  *  RAMPS_13_EFF (Extruder, Fan, Fan)
  *  RAMPS_13_EEF (Extruder, Extruder, Fan)
  *  RAMPS_13_SF  (Spindle, Controller Fan)
- *
+ * 
  *  RAMPS_14_EFB (Extruder, Fan, Bed)
  *  RAMPS_14_EEB (Extruder, Extruder, Bed)
  *  RAMPS_14_EFF (Extruder, Fan, Fan)
@@ -23,9 +23,7 @@
  */
 
 #if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
-  #ifdef ARDUINO_ARCH_AVR
-    #error Oops!  Make sure you have 'Arduino Mega' selected from the Marlin AVR section of the 'Tools -> Boards' menu.
-  #endif
+  #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
 #endif
 
 #define LARGE_FLASH true
@@ -43,9 +41,7 @@
 #define X_DIR_PIN          55
 #define X_ENABLE_PIN       38
 #define X_MIN_PIN           3
-#ifndef X_MAX_PIN
-  #define X_MAX_PIN         2
-#endif
+#define X_MAX_PIN           2
 
 #define Y_STEP_PIN         60
 #define Y_DIR_PIN          61
@@ -56,6 +52,7 @@
 #define Z_STEP_PIN         46
 #define Z_DIR_PIN          48
 #define Z_ENABLE_PIN       62
+//#define Z_MIN_PIN          18
 #define Z_MIN_PIN          32
 #define Z_MAX_PIN          19
 
@@ -79,6 +76,7 @@
 
 #if ENABLED(Z_MIN_PROBE_ENDSTOP)
   // Define a pin to use as the signal pin on Arduino for the Z_PROBE endstop.
+  //#define Z_MIN_PROBE_PIN  32
   #define Z_MIN_PROBE_PIN  18
 #endif
 
@@ -102,6 +100,8 @@
 
 #if ENABLED(REPRAP_DISCOUNT_SMART_CONTROLLER) || ENABLED(G3D_PANEL)
   #define KILL_PIN         41
+#else
+  #define KILL_PIN         -1
 #endif
 
 #if MB(RAMPS_13_EFF)
@@ -234,7 +234,7 @@
       #if ENABLED(G3D_PANEL)
         #define SD_DETECT_PIN 49
       #else
-        //        #define SD_DETECT_PIN -1  // Ramps doesn't use this
+        #define SD_DETECT_PIN -1  // Ramps doesn't use this
       #endif
 
     #endif
@@ -272,8 +272,4 @@
   #define SCK_PIN          52
   #define MISO_PIN         50
   #define MOSI_PIN         51
-#endif
-
-#ifndef KILL_PIN
-  //  #define KILL_PIN         -1
 #endif
