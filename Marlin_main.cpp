@@ -77,7 +77,7 @@
  *  - http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes
  *
  * Help us document these G-codes online:
- *  - http://marlinfirmware.org/index.php/G-Code
+ *  - https://github.com/MarlinFirmware/MarlinDev/wiki/G-Code-in-Marlin
  *  - http://reprap.org/wiki/G-code
  *
  * -----------------

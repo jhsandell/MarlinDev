@@ -486,18 +486,21 @@ unsigned lcd_print(char c) { return charset_mapper(c); }
     lcd.setCursor(TEXT_SCREEN_LOGO_SHIFT, 1);                    lcd_printPGM(PSTR("|Marlin|"));
     lcd.setCursor(TEXT_SCREEN_LOGO_SHIFT, 2); lcd.print('\x02'); lcd_printPGM(PSTR( "------" ));  lcd.print('\x03');
 
-    lcd_scroll(0, 3, PSTR("marlinfirmware.org"), LCD_WIDTH, 3000);
+    // lcd_scroll(0, 3, PSTR("marlinfirmware.org"), LCD_WIDTH, 3000);
+    delay(2000);
 
     #ifdef STRING_SPLASH_LINE1
       lcd_erase_line(3);
       lcd_scroll(0, 3, PSTR(STRING_SPLASH_LINE1), LCD_WIDTH, 1000);
     #endif
+
     #ifdef STRING_SPLASH_LINE2
       lcd_erase_line(3);
       lcd_scroll(0, 3, PSTR(STRING_SPLASH_LINE2), LCD_WIDTH, 1000);
     #endif
   }
 #endif // SHOW_BOOTSCREEN
+
 /*
 Possible status screens:
 16x2   |000/000 B000/000|
