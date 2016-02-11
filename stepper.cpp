@@ -93,8 +93,8 @@ static volatile char endstop_hit_bits = 0; // use X_MIN, Y_MIN, Z_MIN and Z_MIN_
 
 static bool check_endstops = true;
 
-volatile long count_position[NUM_AXIS] = { 0 };
-volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1 };
+volatile long count_position[NUM_AXIS] = { 0 }; // Positions of stepper motors, in step units
+volatile signed char count_direction[NUM_AXIS] = { 1 };
 
 
 //===========================================================================
@@ -288,7 +288,7 @@ void checkHitEndstops() {
 
 void enable_endstops(bool check) { check_endstops = check; }
 
-// Check endstops
+// Check endstops - Called from ISR!
 inline void update_endstops() {
 
   #if ENABLED(Z_DUAL_ENDSTOPS)
@@ -311,23 +311,42 @@ inline void update_endstops() {
   // TEST_ENDSTOP: test the old and the current status of an endstop
   #define TEST_ENDSTOP(ENDSTOP) (TEST(current_endstop_bits, ENDSTOP) && TEST(old_endstop_bits, ENDSTOP))
 
-  #define UPDATE_ENDSTOP(AXIS,MINMAX) \
-    SET_ENDSTOP_BIT(AXIS, MINMAX); \
-    if (TEST_ENDSTOP(_ENDSTOP(AXIS, MINMAX))  && (current_block->steps[_AXIS(AXIS)] > 0)) { \
-      endstops_trigsteps[_AXIS(AXIS)] = count_position[_AXIS(AXIS)]; \
-      _ENDSTOP_HIT(AXIS); \
-      step_events_completed = current_block->step_event_count; \
-    }
+  #if ENABLED(COREXY) || ENABLED(COREXZ)
 
-  #if ENABLED(COREXY)
-    // Head direction in -X axis for CoreXY bots.
-    // If DeltaX == -DeltaY, the movement is only in Y axis
-    if ((current_block->steps[A_AXIS] != current_block->steps[B_AXIS]) || (TEST(out_bits, A_AXIS) == TEST(out_bits, B_AXIS))) {
-      if (TEST(out_bits, X_HEAD))
-  #elif ENABLED(COREXZ)
-    // Head direction in -X axis for CoreXZ bots.
-    // If DeltaX == -DeltaZ, the movement is only in Z axis
-    if ((current_block->steps[A_AXIS] != current_block->steps[C_AXIS]) || (TEST(out_bits, A_AXIS) == TEST(out_bits, C_AXIS))) {
+    #if ENABLED(COREXY)
+      #define CORE_AXIS_2 B_AXIS
+    #else
+      #define CORE_AXIS_2 C_AXIS
+    #endif
+
+    #define _SET_TRIGSTEPS(AXIS) do { \
+        float axis_pos = count_position[_AXIS(AXIS)]; \
+        if (_AXIS(AXIS) == A_AXIS) \
+          axis_pos = (axis_pos + count_position[CORE_AXIS_2]) / 2; \
+        else if (_AXIS(AXIS) == CORE_AXIS_2) \
+          axis_pos = (count_position[A_AXIS] - axis_pos) / 2; \
+        endstops_trigsteps[_AXIS(AXIS)] = axis_pos; \
+      } while(0)
+
+  #else
+
+    #define _SET_TRIGSTEPS(AXIS) endstops_trigsteps[_AXIS(AXIS)] = count_position[_AXIS(AXIS)]
+
+  #endif // COREXY || COREXZ
+
+  #define UPDATE_ENDSTOP(AXIS,MINMAX) do { \
+      SET_ENDSTOP_BIT(AXIS, MINMAX); \
+      if (TEST_ENDSTOP(_ENDSTOP(AXIS, MINMAX)) && current_block->steps[_AXIS(AXIS)] > 0) { \
+        _SET_TRIGSTEPS(AXIS); \
+        _ENDSTOP_HIT(AXIS); \
+        step_events_completed = current_block->step_event_count; \
+      } \
+    } while(0)
+
+  #if ENABLED(COREXY) || ENABLED(COREXZ)
+    // Head direction in -X axis for CoreXY and CoreXZ bots.
+    // If Delta1 == -Delta2, the movement is only in Y or Z axis
+    if ((current_block->steps[A_AXIS] != current_block->steps[CORE_AXIS_2]) || (TEST(out_bits, A_AXIS) == TEST(out_bits, CORE_AXIS_2))) {
       if (TEST(out_bits, X_HEAD))
   #else
     if (TEST(out_bits, X_AXIS))   // stepping along -X axis (regular Cartesian bot)
