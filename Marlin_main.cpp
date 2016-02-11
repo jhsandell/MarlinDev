@@ -4287,12 +4287,26 @@ inline void gcode_M114() {
   SERIAL_PROTOCOLPGM(" E:");
   SERIAL_PROTOCOL(current_position[E_AXIS]);
 
-  SERIAL_PROTOCOLPGM(MSG_COUNT_X);
-  SERIAL_PROTOCOL(st_get_position_mm(X_AXIS));
-  SERIAL_PROTOCOLPGM(" Y:");
-  SERIAL_PROTOCOL(st_get_position_mm(Y_AXIS));
-  SERIAL_PROTOCOLPGM(" Z:");
-  SERIAL_PROTOCOL(st_get_position_mm(Z_AXIS));
+  #if ENABLED(COREXY) || ENABLED(COREXZ)
+    SERIAL_PROTOCOLPGM(MSG_COUNT_A);
+  #else
+    SERIAL_PROTOCOLPGM(MSG_COUNT_X);
+  #endif
+  SERIAL_PROTOCOL(st_get_position(X_AXIS));
+
+  #if ENABLED(COREXY)
+    SERIAL_PROTOCOLPGM(" B:");
+  #else
+    SERIAL_PROTOCOLPGM(" Y:");
+  #endif
+  SERIAL_PROTOCOL(st_get_position(Y_AXIS));
+
+  #if ENABLED(COREXZ)
+    SERIAL_PROTOCOLPGM(" C:");
+  #else
+    SERIAL_PROTOCOLPGM(" Z:");
+  #endif
+  SERIAL_PROTOCOL(st_get_position(Z_AXIS));
 
   SERIAL_EOL;
 
