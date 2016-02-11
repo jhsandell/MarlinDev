@@ -1094,7 +1094,21 @@ long st_get_position(uint8_t axis) {
   return count_pos;
 }
 
-float st_get_position_mm(AxisEnum axis) { return st_get_position(axis) / axis_steps_per_unit[axis]; }
+float st_get_axis_position_mm(AxisEnum axis) {
+  float axis_pos = st_get_position(axis);
+  #if ENABLED(COREXY)
+    if (axis == X_AXIS)
+      axis_pos = (axis_pos + st_get_position(B_AXIS)) / 2; // ((x+y)+(x-y))/2 -> (x+y+x-y)/2 -> (x+x)/2
+    else if (axis == Y_AXIS)
+      axis_pos = (st_get_position(A_AXIS) - axis_pos) / 2; // ((x+y)-(x-y))/2 -> (x+y-x+y)/2 -> (y+y)/2
+  #elif ENABLED(COREXZ)
+    if (axis == X_AXIS)
+      axis_pos = (axis_pos + st_get_position(C_AXIS)) / 2; // ((x+z)+(x-z))/2 -> (x+z+x-z)/2 -> (x+x)/2
+    else if (axis == Z_AXIS)
+      axis_pos = (st_get_position(A_AXIS) - axis_pos) / 2; // ((x+z)-(x-z))/2 -> (x+z-x+z)/2 -> (z+z)/2
+  #endif
+  return axis_pos / axis_steps_per_unit[axis];
+}
 
 void finishAndDisableSteppers() {
   st_synchronize();
