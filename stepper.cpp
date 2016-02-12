@@ -1106,9 +1106,8 @@ void st_set_e_position(const long& e) {
 }
 
 long st_get_position(uint8_t axis) {
-  long count_pos;
   CRITICAL_SECTION_START;
-  count_pos = count_position[axis];
+  long count_pos = count_position[axis];
   CRITICAL_SECTION_END;
   return count_pos;
 }
