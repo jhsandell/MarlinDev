@@ -4287,26 +4287,33 @@ inline void gcode_M114() {
   SERIAL_PROTOCOLPGM(" E:");
   SERIAL_PROTOCOL(current_position[E_AXIS]);
 
+  CRITICAL_SECTION_START;
+  extern volatile long count_position[NUM_AXIS];
+  long xpos = count_position[X_AXIS],
+       ypos = count_position[Y_AXIS],
+       zpos = count_position[Z_AXIS];
+  CRITICAL_SECTION_END;
+
   #if ENABLED(COREXY) || ENABLED(COREXZ)
     SERIAL_PROTOCOLPGM(MSG_COUNT_A);
   #else
     SERIAL_PROTOCOLPGM(MSG_COUNT_X);
   #endif
-  SERIAL_PROTOCOL(st_get_position(X_AXIS));
+  SERIAL_PROTOCOL(xpos);
 
   #if ENABLED(COREXY)
     SERIAL_PROTOCOLPGM(" B:");
   #else
     SERIAL_PROTOCOLPGM(" Y:");
   #endif
-  SERIAL_PROTOCOL(st_get_position(Y_AXIS));
+  SERIAL_PROTOCOL(ypos);
 
   #if ENABLED(COREXZ)
     SERIAL_PROTOCOLPGM(" C:");
   #else
     SERIAL_PROTOCOLPGM(" Z:");
   #endif
-  SERIAL_PROTOCOL(st_get_position(Z_AXIS));
+  SERIAL_PROTOCOL(zpos);
 
   SERIAL_EOL;
 
