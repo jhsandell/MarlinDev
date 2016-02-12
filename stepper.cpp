@@ -286,6 +286,12 @@ void checkHitEndstops() {
   }
 }
 
+#if ENABLED(COREXY)
+  #define CORE_AXIS_2 B_AXIS
+#elif ENABLED(COREXZ)
+  #define CORE_AXIS_2 C_AXIS
+#endif
+
 void enable_endstops(bool check) { check_endstops = check; }
 
 // Check endstops - Called from ISR!
@@ -312,12 +318,6 @@ inline void update_endstops() {
   #define TEST_ENDSTOP(ENDSTOP) (TEST(current_endstop_bits, ENDSTOP) && TEST(old_endstop_bits, ENDSTOP))
 
   #if ENABLED(COREXY) || ENABLED(COREXZ)
-
-    #if ENABLED(COREXY)
-      #define CORE_AXIS_2 B_AXIS
-    #else
-      #define CORE_AXIS_2 C_AXIS
-    #endif
 
     #define _SET_TRIGSTEPS(AXIS) do { \
         float axis_pos = count_position[_AXIS(AXIS)]; \
@@ -1114,17 +1114,21 @@ long st_get_position(uint8_t axis) {
 }
 
 float st_get_axis_position_mm(AxisEnum axis) {
-  float axis_pos = st_get_position(axis);
-  #if ENABLED(COREXY)
-    if (axis == X_AXIS)
-      axis_pos = (axis_pos + st_get_position(B_AXIS)) / 2; // ((x+y)+(x-y))/2 -> (x+y+x-y)/2 -> (x+x)/2
-    else if (axis == Y_AXIS)
-      axis_pos = (st_get_position(A_AXIS) - axis_pos) / 2; // ((x+y)-(x-y))/2 -> (x+y-x+y)/2 -> (y+y)/2
-  #elif ENABLED(COREXZ)
-    if (axis == X_AXIS)
-      axis_pos = (axis_pos + st_get_position(C_AXIS)) / 2; // ((x+z)+(x-z))/2 -> (x+z+x-z)/2 -> (x+x)/2
-    else if (axis == Z_AXIS)
-      axis_pos = (st_get_position(A_AXIS) - axis_pos) / 2; // ((x+z)-(x-z))/2 -> (x+z-x+z)/2 -> (z+z)/2
+  float axis_pos;
+  #if ENABLED(COREXY) | ENABLED(COREXZ)
+    if (axis == X_AXIS || axis == CORE_AXIS_2) {
+      CRITICAL_SECTION_START;
+      long pos1 = count_position[A_AXIS],
+           pos2 = count_position[CORE_AXIS_2];
+      CRITICAL_SECTION_END;
+      // ((a1+a2)+(a1-a2))/2 -> (a1+a2+a1-a2)/2 -> (a1+a1)/2 -> a1
+      // ((a1+a2)-(a1-a2))/2 -> (a1+a2-a1+a2)/2 -> (a2+a2)/2 -> a2
+      axis_pos = (pos1 + ((axis == X_AXIS) ? pos2 : -pos2)) / 2.0f;
+    }
+    else
+      axis_pos = st_get_position(axis);
+  #else
+    axis_pos = st_get_position(axis);
   #endif
   return axis_pos / axis_steps_per_unit[axis];
 }
