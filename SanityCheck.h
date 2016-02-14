@@ -247,13 +247,22 @@
  * Dual X Carriage requirements
  */
 #if ENABLED(DUAL_X_CARRIAGE)
-  #if EXTRUDERS == 1 || ENABLED(COREXY) \
-      || !HAS_X2_ENABLE || !HAS_X2_STEP || !HAS_X2_DIR \
-      || !defined(X2_HOME_POS) || !defined(X2_MIN_POS) || !defined(X2_MAX_POS) \
-      || !HAS_X_MAX
-    #error Missing or invalid definitions for DUAL_X_CARRIAGE mode.
+  #if !HAS_X2_ENABLE || !HAS_X2_STEP || !HAS_X2_DIR
+    #error DUAL_X_CARRIAGE requires X2 stepper pins to be defined.
   #endif
-  #if X_HOME_DIR != -1 || X2_HOME_DIR != 1
+  #if !HAS_X_MAX || !HAS_X_MIN
+    #error DUAL_X_CARRIAGE requires both X_MIN and X_MAX endstop definitions.
+  #endif
+  #if !defined(X2_HOME_POS) || !defined(X2_MIN_POS) || !defined(X2_MAX_POS)
+    #error DUAL_X_CARRIAGE requires X2 home and movement limits to be defined.
+  #endif
+  #if EXTRUDERS < 2
+    #error DUAL_X_CARRIAGE requires EXTRUDERS >= 2.
+  #endif
+  #if ENABLED(COREXY) || ENABLED(COREXZ)
+    #error DUAL_X_CARRIAGE is not compatible with COREXY or COREXZ.
+  #endif
+  #if X_HOME_DIR < -1 || X2_HOME_DIR != 1
     #error Please use canonical x-carriage assignment.
   #endif
 #endif // DUAL_X_CARRIAGE
