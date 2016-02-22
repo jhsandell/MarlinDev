@@ -88,7 +88,7 @@
   static uint8_t spiRec() {
     uint8_t data = 0;
     // no interrupts during byte receive - about 8 us
-    cli();
+    CRITICAL_SECTION_START;
     // output pin high - like sending 0XFF
     fastDigitalWrite(SPI_MOSI_PIN, HIGH);
 
@@ -106,7 +106,7 @@
       fastDigitalWrite(SPI_SCK_PIN, LOW);
     }
     // enable interrupts
-    sei();
+    CRITICAL_SECTION_END;
     return data;
   }
   //------------------------------------------------------------------------------
