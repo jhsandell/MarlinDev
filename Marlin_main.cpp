@@ -647,11 +647,11 @@ void setup() {
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
-  if (mcu & 1) SERIAL_ECHOLNPGM(MSG_POWERUP);
-  if (mcu & 2) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
-  if (mcu & 4) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
-  if (mcu & 8) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
-  if (mcu & 32) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
+  if (TEST(mcu, 0)) SERIAL_ECHOLNPGM(MSG_POWERUP);
+  if (TEST(mcu, 1)) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
+  if (TEST(mcu, 2)) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
+  if (TEST(mcu, 3)) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
+  if (TEST(mcu, 5)) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
   MCUSR = 0;
 
   SERIAL_ECHOPGM(MSG_MARLIN);
@@ -1601,8 +1601,8 @@ static void setup_for_endstop_move() {
 
   enum ProbeAction {
     ProbeStay          = 0,
-    ProbeDeploy        = BIT(0),
-    ProbeStow          = BIT(1),
+    ProbeDeploy        = _BV(0),
+    ProbeStow          = _BV(1),
     ProbeDeployAndStow = (ProbeDeploy | ProbeStow)
   };
 
@@ -3680,7 +3680,7 @@ inline void gcode_M42() {
         millis_t ms = millis();
         double radius = ms % (X_MAX_LENGTH / 4),       // limit how far out to go
                theta = RADIANS(ms % 360L);
-        float dir = (ms & 0x0001) ? 1 : -1;            // clockwise or counter clockwise
+        float dir = TEST(ms, 0) ? 1 : -1;            // clockwise or counter clockwise
 
         //SERIAL_ECHOPAIR("starting radius: ",radius);
         //SERIAL_ECHOPAIR("   theta: ",theta);
@@ -6408,33 +6408,33 @@ void mesh_plan_buffer_line(float x, float y, float z, const float e, float feed_
     return;
   }
   float nx, ny, ne, normalized_dist;
-  if (ix > pix && (x_splits) & BIT(ix)) {
+  if (ix > pix && TEST(x_splits, ix)) {
     nx = mbl.get_x(ix);
     normalized_dist = (nx - current_position[X_AXIS]) / (x - current_position[X_AXIS]);
     ny = current_position[Y_AXIS] + (y - current_position[Y_AXIS]) * normalized_dist;
     ne = current_position[E_AXIS] + (e - current_position[E_AXIS]) * normalized_dist;
-    x_splits ^= BIT(ix);
+    CBI(x_splits, ix);
   }
-  else if (ix < pix && (x_splits) & BIT(pix)) {
+  else if (ix < pix && TEST(x_splits, pix)) {
     nx = mbl.get_x(pix);
     normalized_dist = (nx - current_position[X_AXIS]) / (x - current_position[X_AXIS]);
     ny = current_position[Y_AXIS] + (y - current_position[Y_AXIS]) * normalized_dist;
     ne = current_position[E_AXIS] + (e - current_position[E_AXIS]) * normalized_dist;
-    x_splits ^= BIT(pix);
+    CBI(x_splits, pix);
   }
-  else if (iy > piy && (y_splits) & BIT(iy)) {
+  else if (iy > piy && TEST(y_splits, iy)) {
     ny = mbl.get_y(iy);
     normalized_dist = (ny - current_position[Y_AXIS]) / (y - current_position[Y_AXIS]);
     nx = current_position[X_AXIS] + (x - current_position[X_AXIS]) * normalized_dist;
     ne = current_position[E_AXIS] + (e - current_position[E_AXIS]) * normalized_dist;
-    y_splits ^= BIT(iy);
+    CBI(y_splits, iy);
   }
-  else if (iy < piy && (y_splits) & BIT(piy)) {
+  else if (iy < piy && TEST(y_splits, piy)) {
     ny = mbl.get_y(piy);
     normalized_dist = (ny - current_position[Y_AXIS]) / (y - current_position[Y_AXIS]);
     nx = current_position[X_AXIS] + (x - current_position[X_AXIS]) * normalized_dist;
     ne = current_position[E_AXIS] + (e - current_position[E_AXIS]) * normalized_dist;
-    y_splits ^= BIT(piy);
+    CBI(y_splits, piy);
   }
   else {
     // Already split on a border
