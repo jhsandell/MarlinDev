@@ -1,8 +1,8 @@
 /**
- * RIGIDBOARD Arduino Mega with RAMPS v1.3 pin assignments
+ * RIGIDBOARD Arduino Mega with RAMPS v1.4 pin assignments
  */
 
-#include "pins_RAMPS_13.h"
+#include "pins_RAMPS_14.h"
 
 #if ENABLED(Z_MIN_PROBE_ENDSTOP)
   #define Z_MIN_PROBE_PIN  19
@@ -84,7 +84,7 @@
 #define E1_ENABLE_PIN      24
 
 #undef  FAN_PIN
-#define FAN_PIN             8 // Same as RAMPS_13_EEF
+#define FAN_PIN             8 // Same as RAMPS_14_EEF
 
 #undef  PS_ON_PIN
 #define PS_ON_PIN          -1
