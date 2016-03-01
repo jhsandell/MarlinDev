@@ -3,7 +3,7 @@
 // using Arduino 1.6.5 (Mac)
 
 // Based on the 1.1 MOTHERBOARD descriptors
-#define MOTHERBOARD BOARD_RAMPS_13_EFB
+#define MOTHERBOARD BOARD_RAMPS_14_EFB
 
 // Optional custom name displayed in the LCD "Ready" message
 #define CUSTOM_MACHINE_NAME "Mini Kossel"
