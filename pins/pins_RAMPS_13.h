@@ -1,13 +1,7 @@
 /**
- * Arduino Mega with RAMPS v1.3 v1.4 pin assignments
+ * Arduino Mega with RAMPS v1.4 (or v1.3) pin assignments
  *
  * Applies to the following boards:
- *
- *  RAMPS_13_EFB (Extruder, Fan, Bed)
- *  RAMPS_13_EEB (Extruder, Extruder, Bed)
- *  RAMPS_13_EFF (Extruder, Fan, Fan)
- *  RAMPS_13_EEF (Extruder, Extruder, Fan)
- *  RAMPS_13_SF  (Spindle, Controller Fan)
  *
  *  RAMPS_14_EFB (Extruder, Fan, Bed)
  *  RAMPS_14_EEB (Extruder, Extruder, Bed)
@@ -15,6 +9,12 @@
  *  RAMPS_14_EEF (Extruder, Extruder, Fan)
  *  RAMPS_14_SF  (Spindle, Controller Fan)
  *
+ *  RAMPS_13_EFB (Extruder, Fan, Bed)
+ *  RAMPS_13_EEB (Extruder, Extruder, Bed)
+ *  RAMPS_13_EFF (Extruder, Fan, Fan)
+ *  RAMPS_13_EEF (Extruder, Extruder, Fan)
+ *  RAMPS_13_SF  (Spindle, Controller Fan)
+ * 
  *  Other pins_MYBOARD.h files may override these defaults
  *
  *  Differences between
@@ -30,10 +30,10 @@
 
 #define LARGE_FLASH true
 
-#ifdef IS_RAMPS_14
-  #define SERVO0_PIN       11
-#else
+#ifdef IS_RAMPS_13
   #define SERVO0_PIN        7 // RAMPS_13 // Will conflict with BTN_EN2 on LCD_I2C_VIKI
+#else
+  #define SERVO0_PIN       11
 #endif
 #define SERVO1_PIN          6
 #define SERVO2_PIN          5
@@ -87,12 +87,12 @@
   #define FILRUNOUT_PIN     4
 #endif
 
-#if MB(RAMPS_13_EFF) || ENABLED(IS_RAMPS_EFB)
+#if MB(RAMPS_14_EFF) || MB(RAMPS_13_EFF) || ENABLED(IS_RAMPS_EFB)
   #define FAN_PIN           9 // (Sprinter config)
-  #if MB(RAMPS_13_EFF)
+  #if MB(RAMPS_14_EFF) || MB(RAMPS_13_EFF)
     #define CONTROLLERFAN_PIN  -1 // Pin used for the fan to cool controller
   #endif
-#elif MB(RAMPS_13_EEF) || MB(RAMPS_13_SF)
+#elif MB(RAMPS_14_EEF) || MB(RAMPS_14_SF) || MB(RAMPS_13_EEF) || MB(RAMPS_13_SF)
   #define FAN_PIN           8
 #else
   #define FAN_PIN           4 // IO pin. Buffer needed
@@ -104,13 +104,13 @@
   #define KILL_PIN         41
 #endif
 
-#if MB(RAMPS_13_EFF)
+#if MB(RAMPS_14_EFF) || MB(RAMPS_13_EFF)
   #define HEATER_0_PIN      8
 #else
   #define HEATER_0_PIN     10   // EXTRUDER 1
 #endif
 
-#if MB(RAMPS_13_SF) || ENABLED(IS_RAMPS_EFB)
+#if MB(RAMPS_14_SF) || MB(RAMPS_13_SF) || ENABLED(IS_RAMPS_EFB)
   #define HEATER_1_PIN     -1
 #else
   #define HEATER_1_PIN      9   // EXTRUDER 2 (FAN On Sprinter)
@@ -122,7 +122,7 @@
 #define TEMP_1_PIN         15   // ANALOG NUMBERING
 #define TEMP_2_PIN         -1   // ANALOG NUMBERING
 
-#if MB(RAMPS_13_EFF) || MB(RAMPS_13_EEF) || MB(RAMPS_13_SF)
+#if MB(RAMPS_14_EFF) || MB(RAMPS_14_EEF) || MB(RAMPS_14_SF) || MB(RAMPS_13_EFF) || MB(RAMPS_13_EEF) || MB(RAMPS_13_SF)
   #define HEATER_BED_PIN   -1    // NO BED
 #else
   #define HEATER_BED_PIN    8    // BED
