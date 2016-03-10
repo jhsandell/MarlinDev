@@ -46,7 +46,7 @@ script:
   # Relaxed Travis check
   # if [ "0" != `find . -name "*.orig" | wc -l` ] ; then echo "Improperly styled source -- run astyle" ; fi
   # build default config
-  - DISPLAY=:1.0 ~/bin/arduino --verify --board marlin:avr:mega  --pref build.unique_id_flags=-DCONFIGURATION_FILE="configurations/travis/RAMPS_13_EFB_default.h" examples/MarlinFirmware/MarlinFirmware.ino
+  - DISPLAY=:1.0 ~/bin/arduino --verify --board marlin:avr:mega  --pref build.unique_id_flags=-DCONFIGURATION_FILE="configurations/travis/RAMPS_14_EFB_default.h" examples/MarlinFirmware/MarlinFirmware.ino
   # add sensor for bed
   - DISPLAY=:1.0 ~/bin/arduino --verify --board marlin:avr:mega  --pref build.unique_id_flags=-DCONFIGURATION_FILE="configurations/travis/TEMP_SENSOR_BED.h" examples/MarlinFirmware/MarlinFirmware.ino
   # change number of extruders to 2
