@@ -105,7 +105,7 @@ static volatile bool temp_meas_ready = false;
     static float cTerm[EXTRUDERS];
     static long last_position[EXTRUDERS];
     static long lpq[LPQ_MAX_LEN];
-    static int lpq_ptr = 0;
+    static uint16_t lpq_ptr = 0;
   #endif
   //int output;
   static float pid_error[EXTRUDERS];
