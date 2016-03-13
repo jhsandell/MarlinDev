@@ -98,7 +98,7 @@
     #define EN_B (_BV(BLEN_B))
     #define EN_A (_BV(BLEN_A))
 
-    #define LCD_CLICKED ((buttons&B_MI)||(buttons&B_ST))
+    #define LCD_CLICKED (buttons&(B_MI|B_ST))
   #endif//NEWPANEL
 
 #else //no LCD
