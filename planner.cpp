@@ -381,7 +381,7 @@ void plan_init() {
       block_t* block = &block_buffer[block_index];
       if (block->steps[X_AXIS] || block->steps[Y_AXIS] || block->steps[Z_AXIS]) {
         float se = (float)block->steps[E_AXIS] / block->step_event_count * block->nominal_speed; // mm/sec;
-        if (se > high) high = se;
+        NOLESS(high, se);
       }
       block_index = next_block_index(block_index);
     }
@@ -580,23 +580,23 @@ float junction_deviation = 0.1;
   // Compute direction bits for this block
   uint8_t db = 0;
   #if ENABLED(COREXY)
-    if (dx < 0) db |= BIT(X_HEAD); // Save the real Extruder (head) direction in X Axis
-    if (dy < 0) db |= BIT(Y_HEAD); // ...and Y
-    if (dz < 0) db |= BIT(Z_AXIS);
-    if (dx + dy < 0) db |= BIT(A_AXIS); // Motor A direction
-    if (dx - dy < 0) db |= BIT(B_AXIS); // Motor B direction
+    if (dx < 0) SBI(db, X_HEAD); // Save the real Extruder (head) direction in X Axis
+    if (dy < 0) SBI(db, Y_HEAD); // ...and Y
+    if (dz < 0) SBI(db, Z_AXIS);
+    if (dx + dy < 0) SBI(db, A_AXIS); // Motor A direction
+    if (dx - dy < 0) SBI(db, B_AXIS); // Motor B direction
   #elif ENABLED(COREXZ)
-    if (dx < 0) db |= BIT(X_HEAD); // Save the real Extruder (head) direction in X Axis
-    if (dy < 0) db |= BIT(Y_AXIS);
-    if (dz < 0) db |= BIT(Z_HEAD); // ...and Z
-    if (dx + dz < 0) db |= BIT(A_AXIS); // Motor A direction
-    if (dx - dz < 0) db |= BIT(C_AXIS); // Motor B direction
+    if (dx < 0) SBI(db, X_HEAD); // Save the real Extruder (head) direction in X Axis
+    if (dy < 0) SBI(db, Y_AXIS);
+    if (dz < 0) SBI(db, Z_HEAD); // ...and Z
+    if (dx + dz < 0) SBI(db, A_AXIS); // Motor A direction
+    if (dx - dz < 0) SBI(db, C_AXIS); // Motor B direction
   #else
-    if (dx < 0) db |= BIT(X_AXIS);
-    if (dy < 0) db |= BIT(Y_AXIS);
-    if (dz < 0) db |= BIT(Z_AXIS);
+    if (dx < 0) SBI(db, X_AXIS);
+    if (dy < 0) SBI(db, Y_AXIS);
+    if (dz < 0) SBI(db, Z_AXIS);
   #endif
-  if (de < 0) db |= BIT(E_AXIS);
+  if (de < 0) SBI(db, E_AXIS);
   block->direction_bits = db;
 
   block->active_extruder = extruder;
@@ -824,14 +824,14 @@ float junction_deviation = 0.1;
          ys1 = axis_segment_time[Y_AXIS][1],
          ys2 = axis_segment_time[Y_AXIS][2];
 
-    if ((direction_change & BIT(X_AXIS)) != 0) {
+    if (TEST(direction_change, X_AXIS)) {
       xs2 = axis_segment_time[X_AXIS][2] = xs1;
       xs1 = axis_segment_time[X_AXIS][1] = xs0;
       xs0 = 0;
     }
     xs0 = axis_segment_time[X_AXIS][0] = xs0 + segment_time;
 
-    if ((direction_change & BIT(Y_AXIS)) != 0) {
+    if (TEST(direction_change, Y_AXIS)) {
       ys2 = axis_segment_time[Y_AXIS][2] = axis_segment_time[Y_AXIS][1];
       ys1 = axis_segment_time[Y_AXIS][1] = axis_segment_time[Y_AXIS][0];
       ys0 = 0;
@@ -1005,7 +1005,7 @@ float junction_deviation = 0.1;
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE) && DISABLED(DELTA)
   vector_3 plan_get_position() {
-    vector_3 position = vector_3(st_get_position_mm(X_AXIS), st_get_position_mm(Y_AXIS), st_get_position_mm(Z_AXIS));
+    vector_3 position = vector_3(st_get_axis_position_mm(X_AXIS), st_get_axis_position_mm(Y_AXIS), st_get_axis_position_mm(Z_AXIS));
 
     //position.debug("in plan_get position");
     //plan_bed_level_matrix.debug("in plan_get_position");

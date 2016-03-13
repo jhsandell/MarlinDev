@@ -345,7 +345,7 @@
 // @section more
 
 // The hardware watchdog should reset the microcontroller disabling all outputs, in case the firmware gets stuck and doesn't do temperature regulation.
-//#define USE_WATCHDOG
+#define USE_WATCHDOG
 
 #if ENABLED(USE_WATCHDOG)
   // If you have a watchdog reboot in an ArduinoMega2560 then the device will hang forever, as a watchdog reset will leave the watchdog on.
@@ -380,7 +380,6 @@
 #if ENABLED(ADVANCE)
   #define EXTRUDER_ADVANCE_K .0
   #define D_FILAMENT 1.75
-  #define STEPS_MM_E 836
 #endif
 
 // @section extras
