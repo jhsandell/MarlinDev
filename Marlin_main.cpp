@@ -354,6 +354,71 @@ static uint8_t target_extruder;
   ;
 #endif
 
+//===========================================================================
+//========================== NEW: INCHWORM kinematics =======================
+//===========================================================================
+/**     carr     D    carr.
+ *   ---==X==0-------0==Y==0------
+ *            \     /     /
+ *           L \   /     /
+ *              \ /     /
+ *               O-----O
+ * 
+ * The Inchworm comprises a set of carriages operating on the same axis.
+ * The arrangement in the Jonstrup variant, slides both carriages on the
+ * same rod: The x-axis. The X and Y stepper motors actuate each one 
+ * carriage.
+ * The effector arms resemble the delta rods from the DELTA kinematics.
+ * Two effector arms are needed for the movement, the third is for keeping
+ * the extruder head aligned parallel to the X-axis.
+ * The z-axis is cartesian, so the kinematics are simple for this part.
+ * 
+ * A new homing procedure will be written.
+ * Homing will measure the size of the machine. X-AXIS-MAX-LENGTH will
+ * be subtracted 2*L to accomodate the y-max position, where the two 
+ * carriages are moved furthest apart.
+ * Homing the z-axis is simple cartesian x-min or x-max.
+ * 
+ * The hotend may be fitted with a bed-levelling switch. But the math
+ * may be quite a mouthfull. BED_LEVELING_MESH may be the obvious choice.
+ * 
+ * Movement:
+ * - a movement along the x-axis is the same for both carriages.
+ * - a movement along the y-axis results in the carriages moving towards
+ *   or away from each other.
+ * - Endstops on the x-axis define the maximum travel of both carriages.
+ * - Endstops on the carriages detect when the carriages collide (at the
+ *   y-min position) or when they move to far away from each other (at
+ *   the y-max position). 
+ * - The distance D is newer ZERO; the endstop has to fit between the two
+ *   carriages. The distance D is newer >= 2*L; The effector arms will 
+ *   collide.
+ *   
+ * Math:
+ *   INVERSE KINEMATICS
+ *   float yreverse = L - position_y; // reverse the direction of Y, or the object will be mirrored.
+ *   float xdiff = sqrt( sq(L) - sq(yreverse) ) + D/2;  // reverse pythagoras a^2 = c^2 - b^2. Add D/2 offset.
+ *   float left_carriage(A-STEPPER) = planner_position_x - xdiff;
+ *   float right_carriage(B-STEPPER) = planner_position_x + xdiff;
+ *   
+ *   FORWARD KINEMATICS
+ *   float position_x = ( A_position_mm + B_position_mm ) / 2; // x position is right mid between the two carriages.
+ *   float xdiff = ( B_position - A_position - D ) / 2; // the b-side of the pythagorean triangle. take away the offset D/2.
+ *   float yreverse = sqrt( sq(L) - sq(xdiff) );
+ *   float position_y = L - yreverse;
+ */
+ 
+#if ENABLED(INCHWORM)
+  float iw_delta[3] = { 0.0, 0.0, 0.0 };  // only two are needed, but z-axis is included for convenience of a readable sourcecode.
+  float inchworm_l = INCHWORM_L; // millimeters. Length of effector.
+  float inchworm_lsq = sq(inchworm_l);
+  float inchworm_d = INCHWORM_D;  // millimeters. Distance btw effector carriage anchors when middle endstop is triggered. 
+  float inchworm_dh = INCHWORM_D/2;  // millimeters. half D. 
+  float iw_segments_per_second = INCHWORM_SEGMENTS_PER_SECOND;
+  float inchworm_max_step = 2 * INCHWORM_L; // millimeters. longest step the inchworm can take. initial value will be overwritten when homing.
+  // add more params...
+#endif // #if ENABLED(INCHWORM)
+
 #if ENABLED(DELTA)
 
   #define TOWER_1 X_AXIS
@@ -694,6 +759,14 @@ void setup() {
   setup_photpin();
   servo_init();
 
+  #if ENABLED(INCHWORM)
+    // ------------------------
+    // dirty fix to some initialization problems on the inchworm. 
+    set_current_to_destination();
+    sync_plan_position_incworm();
+    // ------------------------
+  #endif 
+  
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
   #endif
@@ -1071,78 +1144,91 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 
 static void set_axis_is_at_home(AxisEnum axis) {
 
-  #if ENABLED(DUAL_X_CARRIAGE)
-    if (axis == X_AXIS) {
-      if (active_extruder != 0) {
-        current_position[X_AXIS] = x_home_pos(active_extruder);
-                 min_pos[X_AXIS] = X2_MIN_POS;
-                 max_pos[X_AXIS] = max(extruder_offset[X_AXIS][1], X2_MAX_POS);
-        return;
-      }
-      else if (dual_x_carriage_mode == DXC_DUPLICATION_MODE) {
-        float xoff = home_offset[X_AXIS];
-        current_position[X_AXIS] = base_home_pos(X_AXIS) + xoff;
-                 min_pos[X_AXIS] = base_min_pos(X_AXIS) + xoff;
-                 max_pos[X_AXIS] = min(base_max_pos(X_AXIS) + xoff, max(extruder_offset[X_AXIS][1], X2_MAX_POS) - duplicate_extruder_x_offset);
-        return;
-      }
-    }
-  #endif
+  //===========================================================================
+  //========================== NEW: INCHWORM kinematics =======================
+  //===========================================================================
+  #if ENABLED(INCHWORM)
 
-  #if ENABLED(SCARA)
+	// add the INCHWORM relevant code here.
+	if ((axis == X_AXIS) || (axis == Y_AXIS)) axis_known_position[X_AXIS] = axis_known_position[Y_AXIS] = true;
+	if (axis == Z_AXIS) axis_known_position[Z_AXIS] = true;
+	// must update the min_pos max_pos values. (?)
+  
+  #else  // Everything else than the Inchworm.
+  
+	#if ENABLED(DUAL_X_CARRIAGE)
+	  if (axis == X_AXIS) {
+		if (active_extruder != 0) {
+		  current_position[X_AXIS] = x_home_pos(active_extruder);
+					min_pos[X_AXIS] = X2_MIN_POS;
+					max_pos[X_AXIS] = max(extruder_offset[X_AXIS][1], X2_MAX_POS);
+		  return;
+		}
+		else if (dual_x_carriage_mode == DXC_DUPLICATION_MODE) {
+		  float xoff = home_offset[X_AXIS];
+		  current_position[X_AXIS] = base_home_pos(X_AXIS) + xoff;
+					min_pos[X_AXIS] = base_min_pos(X_AXIS) + xoff;
+					max_pos[X_AXIS] = min(base_max_pos(X_AXIS) + xoff, max(extruder_offset[X_AXIS][1], X2_MAX_POS) - duplicate_extruder_x_offset);
+		  return;
+		}
+	  }
+	#endif
 
-    if (axis == X_AXIS || axis == Y_AXIS) {
+	#if ENABLED(SCARA)
 
-      float homeposition[3];
-      for (int i = 0; i < 3; i++) homeposition[i] = base_home_pos(i);
+	  if (axis == X_AXIS || axis == Y_AXIS) {
 
-      // SERIAL_ECHOPGM("homeposition[x]= "); SERIAL_ECHO(homeposition[0]);
-      // SERIAL_ECHOPGM("homeposition[y]= "); SERIAL_ECHOLN(homeposition[1]);
-      // Works out real Homeposition angles using inverse kinematics,
-      // and calculates homing offset using forward kinematics
-      calculate_delta(homeposition);
+		float homeposition[3];
+		for (int i = 0; i < 3; i++) homeposition[i] = base_home_pos(i);
 
-      // SERIAL_ECHOPGM("base Theta= "); SERIAL_ECHO(delta[X_AXIS]);
-      // SERIAL_ECHOPGM(" base Psi+Theta="); SERIAL_ECHOLN(delta[Y_AXIS]);
+		// SERIAL_ECHOPGM("homeposition[x]= "); SERIAL_ECHO(homeposition[0]);
+		// SERIAL_ECHOPGM("homeposition[y]= "); SERIAL_ECHOLN(homeposition[1]);
+		// Works out real Homeposition angles using inverse kinematics,
+		// and calculates homing offset using forward kinematics
+		calculate_delta(homeposition);
 
-      for (int i = 0; i < 2; i++) delta[i] -= home_offset[i];
+		// SERIAL_ECHOPGM("base Theta= "); SERIAL_ECHO(delta[X_AXIS]);
+		// SERIAL_ECHOPGM(" base Psi+Theta="); SERIAL_ECHOLN(delta[Y_AXIS]);
 
-      // SERIAL_ECHOPGM("addhome X="); SERIAL_ECHO(home_offset[X_AXIS]);
-      // SERIAL_ECHOPGM(" addhome Y="); SERIAL_ECHO(home_offset[Y_AXIS]);
-      // SERIAL_ECHOPGM(" addhome Theta="); SERIAL_ECHO(delta[X_AXIS]);
-      // SERIAL_ECHOPGM(" addhome Psi+Theta="); SERIAL_ECHOLN(delta[Y_AXIS]);
+		for (int i = 0; i < 2; i++) delta[i] -= home_offset[i];
 
-      calculate_SCARA_forward_Transform(delta);
+		// SERIAL_ECHOPGM("addhome X="); SERIAL_ECHO(home_offset[X_AXIS]);
+		// SERIAL_ECHOPGM(" addhome Y="); SERIAL_ECHO(home_offset[Y_AXIS]);
+		// SERIAL_ECHOPGM(" addhome Theta="); SERIAL_ECHO(delta[X_AXIS]);
+		// SERIAL_ECHOPGM(" addhome Psi+Theta="); SERIAL_ECHOLN(delta[Y_AXIS]);
 
-      // SERIAL_ECHOPGM("Delta X="); SERIAL_ECHO(delta[X_AXIS]);
-      // SERIAL_ECHOPGM(" Delta Y="); SERIAL_ECHOLN(delta[Y_AXIS]);
+		calculate_SCARA_forward_Transform(delta);
 
-      current_position[axis] = delta[axis];
+		// SERIAL_ECHOPGM("Delta X="); SERIAL_ECHO(delta[X_AXIS]);
+		// SERIAL_ECHOPGM(" Delta Y="); SERIAL_ECHOLN(delta[Y_AXIS]);
 
-      // SCARA home positions are based on configuration since the actual limits are determined by the
-      // inverse kinematic transform.
-      min_pos[axis] = base_min_pos(axis); // + (delta[axis] - base_home_pos(axis));
-      max_pos[axis] = base_max_pos(axis); // + (delta[axis] - base_home_pos(axis));
-    }
-    else
-  #endif
-  {
-    current_position[axis] = base_home_pos(axis) + home_offset[axis];
-    min_pos[axis] = base_min_pos(axis) + home_offset[axis];
-    max_pos[axis] = base_max_pos(axis) + home_offset[axis];
+		current_position[axis] = delta[axis];
 
-    #if ENABLED(AUTO_BED_LEVELING_FEATURE) && Z_HOME_DIR < 0
-      if (axis == Z_AXIS) current_position[Z_AXIS] -= zprobe_zoffset;
-    #endif
+		// SCARA home positions are based on configuration since the actual limits are determined by the
+		// inverse kinematic transform.
+		min_pos[axis] = base_min_pos(axis); // + (delta[axis] - base_home_pos(axis));
+		max_pos[axis] = base_max_pos(axis); // + (delta[axis] - base_home_pos(axis));
+	  }
+	  else
+	#endif
+	{
+	  current_position[axis] = base_home_pos(axis) + home_offset[axis];
+	  min_pos[axis] = base_min_pos(axis) + home_offset[axis];
+	  max_pos[axis] = base_max_pos(axis) + home_offset[axis];
 
-    #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (marlin_debug_flags & DEBUG_LEVELING) {
-        SERIAL_ECHOPAIR("set_axis_is_at_home ", (unsigned long)axis);
-        SERIAL_ECHOPAIR(" > (home_offset[axis]==", home_offset[axis]);
-        print_xyz(") > current_position", current_position);
-      }
-    #endif
-  }
+	  #if ENABLED(AUTO_BED_LEVELING_FEATURE) && Z_HOME_DIR < 0
+		if (axis == Z_AXIS) current_position[Z_AXIS] -= zprobe_zoffset;
+	  #endif
+
+	  #if ENABLED(DEBUG_LEVELING_FEATURE)
+		if (marlin_debug_flags & DEBUG_LEVELING) {
+		  SERIAL_ECHOPAIR("set_axis_is_at_home ", (unsigned long)axis);
+		  SERIAL_ECHOPAIR(" > (home_offset[axis]==", home_offset[axis]);
+		  print_xyz(") > current_position", current_position);
+		}
+	  #endif
+	}
+  #endif  // #if-else ENABLED(INCHWORM)
 }
 
 /**
@@ -1158,27 +1244,43 @@ inline void set_homing_bump_feedrate(AxisEnum axis) {
   }
   feedrate = homing_feedrate[axis] / hbd;
 }
-inline void line_to_current_position() {
-  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate / 60, active_extruder);
-}
-inline void line_to_z(float zPosition) {
-  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate / 60, active_extruder);
-}
-inline void line_to_destination(float mm_m) {
-  plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], mm_m / 60, active_extruder);
-}
-inline void line_to_destination() {
-  line_to_destination(feedrate);
-}
-inline void sync_plan_position() {
-  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-}
-#if ENABLED(DELTA) || ENABLED(SCARA)
-  inline void sync_plan_position_delta() {
-    calculate_delta(current_position);
-    plan_set_position(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], current_position[E_AXIS]);
+
+/** 
+ * These functions seem to be only compatible with CARTESIAN machines.
+ * Can they be omitted from binaries when building for a non-linear machine?
+ */
+#if DISABLED(DELTA) && DISABLED(SCARA) && DISABLED(INCHWORM)
+  inline void line_to_current_position() {
+	plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate / 60, active_extruder);
   }
+  inline void line_to_z(float zPosition) {
+	plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate / 60, active_extruder);
+  }
+  inline void line_to_destination(float mm_m) {
+	plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], mm_m / 60, active_extruder);
+  }
+  inline void line_to_destination() {
+	line_to_destination(feedrate);
+  }
+  inline void sync_plan_position() {
+	plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+  }
+#endif // #if DISABLED(DELTA) && DISABLED(SCARA) && DISABLED(INCHWORM)
+
+#if ENABLED(DELTA) || ENABLED(SCARA)
+inline void sync_plan_position_delta() {
+	calculate_delta(current_position);
+	plan_set_position(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], current_position[E_AXIS]);
+}
 #endif
+
+#if ENABLED(INCHWORM)
+inline void sync_plan_position_incworm() {
+    calculate_inchworm(current_position);
+    plan_set_position(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], current_position[E_AXIS]);
+}
+#endif
+
 inline void set_current_to_destination() { memcpy(current_position, destination, sizeof(current_position)); }
 inline void set_destination_to_current() { memcpy(destination, current_position, sizeof(destination)); }
 
@@ -1212,7 +1314,7 @@ static void setup_for_endstop_move() {
       plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], destination[E_AXIS], (feedrate / 60) * (feedrate_multiplier / 100.0), active_extruder);
       set_current_to_destination();
     }
-  #endif
+  #endif // #if ENABLED(DELTA)
 
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 
@@ -1815,222 +1917,427 @@ static void setup_for_endstop_move() {
 
 #define HOMEAXIS(LETTER) homeaxis(LETTER##_AXIS)
 
-static void homeaxis(AxisEnum axis) {
-  #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (marlin_debug_flags & DEBUG_LEVELING) {
-      SERIAL_ECHOPAIR(">>> homeaxis(", (unsigned long)axis);
-      SERIAL_CHAR(')');
-      SERIAL_EOL;
-    }
-  #endif
-  #define HOMEAXIS_DO(LETTER) \
-    ((LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1) || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1))
+#if ENABLED(INCHWORM)
+  static void homexyaxis_inchworm()
+  {
+	//===========================================================================
+	//========================== NEW: INCHWORM kinematics =======================
+	//===========================================================================
+	#warning you haven't completed the homing algorithm.
+	// Check for X-AXIS, since homing is a combined effort of both x- and y-axes.
 
-  if (axis == X_AXIS ? HOMEAXIS_DO(X) : axis == Y_AXIS ? HOMEAXIS_DO(Y) : axis == Z_AXIS ? HOMEAXIS_DO(Z) : 0) {
+    
+	/** 
+	  *  INCHWORM Homing XY:
+	  *  a. move both carriages together until Y-MIN endstop. Calculate Y-MIN and set position.
+	  *  b. move both carriages left until X-MIN endstop is hit. Set X-MIN.
+	  *  c. move right carriage to the right until Y-MAX endstop is hit. Record the traveled y'-LENGTH and calculate Y-MAX
+	  *  d. move both carriages right - inchworming - until X-MAX endstop is hit. 
+	  *     record the traveled X-length.
+	  *     move to the middle of the X axis.
+	  *  e. move to Y-min.
+	  *  f. calculate min, max, dead-zones.
+	  *  g. set currentposition and the known-position-flags.
+	  *  
+	  *  IMPORTANT:
+	  *  The trick to do the inchworm move is to plan it without the inchworm kinematics transformation.
+	  *  Just call the planner with either the X- or Y-axis as if it was a normal cartesian axis.
+	  *  
+	  */
 
-    int axis_home_dir =
-      #if ENABLED(DUAL_X_CARRIAGE)
-        (axis == X_AXIS) ? x_home_dir(active_extruder) :
-      #endif
-      home_dir(axis);
+	  // --- a. home Y_MIN. ---------------------------------------------------------------------
+	  feedrate = homing_feedrate[Y_AXIS];
 
-    // Set the axis position as setup for the move
-    current_position[axis] = 0;
-    sync_plan_position();
+	  // set a fake position and target destination.
+	  current_position[Y_AXIS] = base_max_pos(Y_AXIS);
+	  destination[Y_AXIS] = base_min_pos(Y_AXIS); // move towards Y-MIN endstop.
 
-    #if ENABLED(Z_PROBE_SLED)
-      // Get Probe
-      if (axis == Z_AXIS) {
-        if (axis_home_dir < 0) dock_sled(false);
-      }
-    #endif
+	  destination[X_AXIS] = current_position[X_AXIS] = 0;
+	  destination[Z_AXIS] = current_position[Z_AXIS] = 0;
+	  destination[E_AXIS] = current_position[E_AXIS] = 0;
+	  sync_plan_position_incworm();  // Set position of steppers.
 
-    #if SERVO_LEVELING && DISABLED(Z_PROBE_SLED)
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
 
-      // Deploy a Z probe if there is one, and homing towards the bed
-      if (axis == Z_AXIS) {
-        if (axis_home_dir < 0) deploy_z_probe();
-      }
+	  // Bump and retry.      
+	  iw_delta[X_AXIS] -= home_bump_mm(Y_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y away from each other.
+	  iw_delta[Y_AXIS] += home_bump_mm(Y_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  set_homing_bump_feedrate(Y_AXIS);
+	  iw_delta[X_AXIS] += 2.0 * home_bump_mm(Y_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y towards each other.
+	  iw_delta[Y_AXIS] -= 2.0 * home_bump_mm(Y_AXIS);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize(); // Now move.
+	  endstops_hit_on_purpose();
 
-    #endif
+	  feedrate = homing_feedrate[Y_AXIS];
+	  destination[Y_AXIS] += 0.1;   // MOVE AWAY FROM ENDSTOP.
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
 
-    #if HAS_SERVO_ENDSTOPS
-      // Engage Servo endstop if enabled
-      if (axis != Z_AXIS && servo_endstop_id[axis] >= 0)
-        servo[servo_endstop_id[axis]].move(servo_endstop_angle[axis][0]);
-    #endif
+	  set_current_to_destination();
 
-    // Set a flag for Z motor locking
-    #if ENABLED(Z_DUAL_ENDSTOPS)
-      if (axis == Z_AXIS) In_Homing_Process(true);
-    #endif
+	  min_pos[Y_AXIS] = current_position[Y_AXIS] = base_min_pos(Y_AXIS); // now the Y-position is known.
+	  sync_plan_position_incworm();
 
-    // Move towards the endstop until an endstop is triggered
-    destination[axis] = 1.5 * max_length(axis) * axis_home_dir;
-    feedrate = homing_feedrate[axis];
-    line_to_destination();
-    st_synchronize();
+	  // --- b. home X_MIN. ---------------------------------------------------------------------
+	  feedrate = homing_feedrate[X_AXIS];
+	  current_position[X_AXIS] = max_length(X_AXIS);  // setup fake position and destination.
+	  sync_plan_position_incworm();
+	  set_destination_to_current();
+	  destination[X_AXIS] = base_min_pos(X_AXIS);   // This will move A-AXIS to zero. 
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
 
-    // Set the axis position as setup for the move
-    current_position[axis] = 0;
-    sync_plan_position();
+	  // Bump and retry.      
+	  iw_delta[X_AXIS] += home_bump_mm(Y_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y away from X-MIN ENDSTOP.
+	  iw_delta[Y_AXIS] += home_bump_mm(Y_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  set_homing_bump_feedrate(X_AXIS);
+	  iw_delta[X_AXIS] -= 2.0 * home_bump_mm(Y_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y towards X-MIN ENDSTOP.
+	  iw_delta[Y_AXIS] -= 2.0 * home_bump_mm(Y_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
 
-    #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (marlin_debug_flags & DEBUG_LEVELING) {
-        SERIAL_ECHOLNPGM("> enable_endstops(false)");
-      }
-    #endif
-    enable_endstops(false); // Disable endstops while moving away
+	  endstops_hit_on_purpose();
+	  current_position[X_AXIS] = min_pos[X_AXIS] = base_min_pos(X_AXIS); 
+	  sync_plan_position_incworm();
+	  set_destination_to_current();
+	  feedrate = homing_feedrate[X_AXIS];
+	  destination[X_AXIS] +=  inchworm_l + home_bump_mm(X_AXIS);   // MOVE AWAY FROM ENDSTOP. Set L+HOMEBUMP as deadzone.
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
+	  min_pos[X_AXIS] = destination[X_AXIS];  // RESTRAIN X-MIN AFTER MOVE. 
+	  set_current_to_destination();
+	  endstops_hit_on_purpose();
+	  sync_plan_position_incworm();
 
-    // Move away from the endstop by the axis HOME_BUMP_MM
-    destination[axis] = -home_bump_mm(axis) * axis_home_dir;
-    line_to_destination();
-    st_synchronize();
+	  // c. home Y-MAX 
+	  // special condition: only move Y-STEPPER until Y_MAX endstop is hit.
+	  // record the travelled distance and do a reverse pythagoras to find Y_MAX.
+	  feedrate = homing_feedrate[Y_AXIS];
+	  destination[Y_AXIS] = inchworm_l;
+	  calculate_inchworm(destination);
 
-    #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (marlin_debug_flags & DEBUG_LEVELING) {
-        SERIAL_ECHOLNPGM("> enable_endstops(true)");
-      }
-    #endif
-    enable_endstops(true); // Enable endstops for next homing move
+	  // the two carriages cannot move further than 2*L away from each other; in fact it is much shorter, due to geometry of the effector arms.
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
+	  endstops_hit_on_purpose();
 
-    // Slow down the feedrate for the next move
-    set_homing_bump_feedrate(axis);
+	  iw_delta[X_AXIS] += home_bump_mm(Y_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y away from Y-MAX ENDSTOP.
+	  iw_delta[Y_AXIS] -= home_bump_mm(Y_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  set_homing_bump_feedrate(Y_AXIS);
+	  iw_delta[X_AXIS] -= 2.0 * home_bump_mm(Y_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y towards Y-MAX ENDSTOP.
+	  iw_delta[Y_AXIS] += 2.0 * home_bump_mm(Y_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
 
-    // Move slowly towards the endstop until triggered
-    destination[axis] = 2 * home_bump_mm(axis) * axis_home_dir;
-    line_to_destination();
-    st_synchronize();
+	  float machineposition[3]; 
+	  machineposition[X_AXIS] = st_get_position_mm(X_AXIS);  
+	  machineposition[Y_AXIS] = st_get_position_mm(Y_AXIS);  
+	  machineposition[Z_AXIS] = st_get_position_mm(Z_AXIS); 
+	  calculate_inchworm_forward(machineposition);
 
-    #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (marlin_debug_flags & DEBUG_LEVELING) {
-        print_xyz("> TRIGGER ENDSTOP > current_position", current_position);
-      }
-    #endif
+	  for (int ii1=0; ii1<3; ii1++) current_position[ii1] = iw_delta[ii1];
+	  max_pos[Y_AXIS] = iw_delta[Y_AXIS] + 1;
+	  set_destination_to_current();
+	  sync_plan_position();
 
-    #if ENABLED(Z_DUAL_ENDSTOPS)
-      if (axis == Z_AXIS) {
-        float adj = fabs(z_endstop_adj);
-        bool lockZ1;
-        if (axis_home_dir > 0) {
-          adj = -adj;
-          lockZ1 = (z_endstop_adj > 0);
-        }
-        else
-          lockZ1 = (z_endstop_adj < 0);
+	  // reset to real destination position and synchronize steppers.
+	  feedrate = homing_feedrate[X_AXIS];
+	  destination[Y_AXIS] = 0.0;
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
+	  max_pos[Y_AXIS] -= 1.5;
+	  set_current_to_destination();
+	  sync_plan_position();
 
-        if (lockZ1) Lock_z_motor(true); else Lock_z2_motor(true);
-        sync_plan_position();
+	  // d. find X_MAX by inchworming to the right.
+	  destination[X_AXIS] = max_length(X_AXIS);
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
+	  endstops_hit_on_purpose();
 
-        // Move to the adjusted endstop height
-        feedrate = homing_feedrate[axis];
-        destination[Z_AXIS] = adj;
-        line_to_destination();
-        st_synchronize();
+	  iw_delta[X_AXIS] -= home_bump_mm(X_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y away from X-MAX ENDSTOP.
+	  iw_delta[Y_AXIS] -= home_bump_mm(X_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  set_homing_bump_feedrate(X_AXIS);
+	  iw_delta[X_AXIS] += 2.0 * home_bump_mm(X_AXIS); // dirty! use home_bump directly on A_AXIS and B_AXIS. move x and y towards X-MIN ENDSTOP.
+	  iw_delta[Y_AXIS] += 2.0 * home_bump_mm(X_AXIS); 
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
+	  endstops_hit_on_purpose();
+      
+	  machineposition[X_AXIS] = st_get_position_mm(X_AXIS);  
+	  machineposition[Y_AXIS] = st_get_position_mm(Y_AXIS);  
+	  machineposition[Z_AXIS] = st_get_position_mm(Z_AXIS); 
+	  calculate_inchworm_forward(machineposition);
+	  for (int ii1=0; ii1<3; ii1++) current_position[ii1] = iw_delta[ii1];
+	  max_pos[X_AXIS] = iw_delta[X_AXIS]+1;
+	  set_destination_to_current();
+	  sync_plan_position();
 
-        if (lockZ1) Lock_z_motor(false); else Lock_z2_motor(false);
-        In_Homing_Process(false);
-      } // Z_AXIS
-    #endif
+	  feedrate = homing_feedrate[X_AXIS];
+	  destination[X_AXIS] = destination[Y_AXIS] = destination[Z_AXIS] = 0;
+	  calculate_inchworm(destination);
+	  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], destination[E_AXIS], (feedrate/60)*(feedrate_multiplier/100.0), active_extruder);
+	  st_synchronize();
+	  set_current_to_destination();
+	  max_pos[X_AXIS] -= inchworm_l - home_bump_mm(X_AXIS) - 1;
+	  sync_plan_position();
+      
+  DEBUG_POSITION_VECTOR3(" - min_pos: ",min_pos);
+  DEBUG_POSITION_VECTOR3(" - max_pos: ",max_pos);
 
-    #if ENABLED(DELTA)
-      // retrace by the amount specified in endstop_adj
-      if (endstop_adj[axis] * axis_home_dir < 0) {
-        #if ENABLED(DEBUG_LEVELING_FEATURE)
-          if (marlin_debug_flags & DEBUG_LEVELING) {
-            SERIAL_ECHOLNPGM("> enable_endstops(false)");
-          }
-        #endif
-        enable_endstops(false); // Disable endstops while moving away
-        sync_plan_position();
-        destination[axis] = endstop_adj[axis];
-        #if ENABLED(DEBUG_LEVELING_FEATURE)
-          if (marlin_debug_flags & DEBUG_LEVELING) {
-            SERIAL_ECHOPAIR("> endstop_adj = ", endstop_adj[axis]);
-            print_xyz(" > destination", destination);
-          }
-        #endif
-        line_to_destination();
-        st_synchronize();
-        #if ENABLED(DEBUG_LEVELING_FEATURE)
-          if (marlin_debug_flags & DEBUG_LEVELING) {
-            SERIAL_ECHOLNPGM("> enable_endstops(true)");
-          }
-        #endif
-        enable_endstops(true); // Enable endstops for next homing move
-      }
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        else {
-          if (marlin_debug_flags & DEBUG_LEVELING) {
-            SERIAL_ECHOPAIR("> endstop_adj * axis_home_dir = ", endstop_adj[axis] * axis_home_dir);
-            SERIAL_EOL;
-          }
-        }
-      #endif
-    #endif
-
-    // Set the axis position to its home position (plus home offsets)
-    set_axis_is_at_home(axis);
-    sync_plan_position();
-
-    #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (marlin_debug_flags & DEBUG_LEVELING) {
-        print_xyz("> AFTER set_axis_is_at_home > current_position", current_position);
-      }
-    #endif
-
-    destination[axis] = current_position[axis];
-    feedrate = 0.0;
-    endstops_hit_on_purpose(); // clear endstop hit flags
-    axis_known_position[axis] = true;
-
-    #if ENABLED(Z_PROBE_SLED)
-      // bring Z probe back
-      if (axis == Z_AXIS) {
-        if (axis_home_dir < 0) dock_sled(true);
-      }
-    #endif
-
-    #if SERVO_LEVELING && DISABLED(Z_PROBE_SLED)
-
-      // Deploy a Z probe if there is one, and homing towards the bed
-      if (axis == Z_AXIS) {
-        if (axis_home_dir < 0) {
-          #if ENABLED(DEBUG_LEVELING_FEATURE)
-            if (marlin_debug_flags & DEBUG_LEVELING) {
-              SERIAL_ECHOLNPGM("> SERVO_LEVELING > stow_z_probe");
-            }
-          #endif
-          stow_z_probe();
-        }
-      }
-      else
-
-    #endif
-
-    {
-      #if HAS_SERVO_ENDSTOPS
-        // Retract Servo endstop if enabled
-        if (servo_endstop_id[axis] >= 0) {
-          #if ENABLED(DEBUG_LEVELING_FEATURE)
-            if (marlin_debug_flags & DEBUG_LEVELING) {
-              SERIAL_ECHOLNPGM("> SERVO_ENDSTOPS > Stow with servo.move()");
-            }
-          #endif
-          servo[servo_endstop_id[axis]].move(servo_endstop_angle[axis][1]);
-        }
-      #endif
-    }
+	  set_axis_is_at_home(X_AXIS);
 
   }
+#endif // #if ENABLED(INCHWORM)
 
-  #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (marlin_debug_flags & DEBUG_LEVELING) {
-      SERIAL_ECHOPAIR("<<< homeaxis(", (unsigned long)axis);
-      SERIAL_CHAR(')');
-      SERIAL_EOL;
-    }
+
+static void homeaxis(AxisEnum axis) {
+
+  #if ENABLED(INCHWORM)
+
+	if (axis == X_AXIS) {
+	  homexyaxis_inchworm()
+	} // if (axis == X_AXIS)
+	
+	// Check for Z-AXIS and home that. NB: PURE CARTESIAN.
+	if (axis == Z_AXIS) {
+		#warning "you have yet to write this..."
+	}
   #endif
+
+  /** 
+   * Original homeaxis source is left untouched.
+   */
+  #if DISABLED(INCHWORM)
+  
+	#if ENABLED(DEBUG_LEVELING_FEATURE)
+	  if (marlin_debug_flags & DEBUG_LEVELING) {
+		SERIAL_ECHOPAIR(">>> homeaxis(", (unsigned long)axis);
+		SERIAL_CHAR(')');
+		SERIAL_EOL;
+	  }
+	#endif
+	#define HOMEAXIS_DO(LETTER) \
+	  ((LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1) || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1))
+
+	if (axis == X_AXIS ? HOMEAXIS_DO(X) : axis == Y_AXIS ? HOMEAXIS_DO(Y) : axis == Z_AXIS ? HOMEAXIS_DO(Z) : 0) {
+
+	  int axis_home_dir =
+		#if ENABLED(DUAL_X_CARRIAGE)
+		  (axis == X_AXIS) ? x_home_dir(active_extruder) :
+		#endif
+		home_dir(axis);
+
+	  // Set the axis position as setup for the move
+	  current_position[axis] = 0;
+	  sync_plan_position();
+
+	  #if ENABLED(Z_PROBE_SLED)
+		// Get Probe
+		if (axis == Z_AXIS) {
+		  if (axis_home_dir < 0) dock_sled(false);
+		}
+	  #endif
+
+	  #if SERVO_LEVELING && DISABLED(Z_PROBE_SLED)
+
+		// Deploy a Z probe if there is one, and homing towards the bed
+		if (axis == Z_AXIS) {
+		  if (axis_home_dir < 0) deploy_z_probe();
+		}
+
+	  #endif
+
+	  #if HAS_SERVO_ENDSTOPS
+		// Engage Servo endstop if enabled
+		if (axis != Z_AXIS && servo_endstop_id[axis] >= 0)
+		  servo[servo_endstop_id[axis]].move(servo_endstop_angle[axis][0]);
+	  #endif
+
+	  // Set a flag for Z motor locking
+	  #if ENABLED(Z_DUAL_ENDSTOPS)
+		if (axis == Z_AXIS) In_Homing_Process(true);
+	  #endif
+
+	  // Move towards the endstop until an endstop is triggered
+	  destination[axis] = 1.5 * max_length(axis) * axis_home_dir;
+	  feedrate = homing_feedrate[axis];
+	  line_to_destination();
+	  st_synchronize();
+
+	  // Set the axis position as setup for the move
+	  current_position[axis] = 0;
+	  sync_plan_position();
+
+	  #if ENABLED(DEBUG_LEVELING_FEATURE)
+		if (marlin_debug_flags & DEBUG_LEVELING) {
+		  SERIAL_ECHOLNPGM("> enable_endstops(false)");
+		}
+	  #endif
+	  enable_endstops(false); // Disable endstops while moving away
+
+	  // Move away from the endstop by the axis HOME_BUMP_MM
+	  destination[axis] = -home_bump_mm(axis) * axis_home_dir;
+	  line_to_destination();
+	  st_synchronize();
+
+	  #if ENABLED(DEBUG_LEVELING_FEATURE)
+		if (marlin_debug_flags & DEBUG_LEVELING) {
+		  SERIAL_ECHOLNPGM("> enable_endstops(true)");
+		}
+	  #endif
+	  enable_endstops(true); // Enable endstops for next homing move
+
+	  // Slow down the feedrate for the next move
+	  set_homing_bump_feedrate(axis);
+
+	  // Move slowly towards the endstop until triggered
+	  destination[axis] = 2 * home_bump_mm(axis) * axis_home_dir;
+	  line_to_destination();
+	  st_synchronize();
+
+	  #if ENABLED(DEBUG_LEVELING_FEATURE)
+		if (marlin_debug_flags & DEBUG_LEVELING) {
+		  print_xyz("> TRIGGER ENDSTOP > current_position", current_position);
+		}
+	  #endif
+
+	  #if ENABLED(Z_DUAL_ENDSTOPS)
+		if (axis == Z_AXIS) {
+		  float adj = fabs(z_endstop_adj);
+		  bool lockZ1;
+		  if (axis_home_dir > 0) {
+			adj = -adj;
+			lockZ1 = (z_endstop_adj > 0);
+		  }
+		  else
+			lockZ1 = (z_endstop_adj < 0);
+
+		  if (lockZ1) Lock_z_motor(true); else Lock_z2_motor(true);
+		  sync_plan_position();
+
+		  // Move to the adjusted endstop height
+		  feedrate = homing_feedrate[axis];
+		  destination[Z_AXIS] = adj;
+		  line_to_destination();
+		  st_synchronize();
+
+		  if (lockZ1) Lock_z_motor(false); else Lock_z2_motor(false);
+		  In_Homing_Process(false);
+		} // Z_AXIS
+	  #endif
+
+	  #if ENABLED(DELTA)
+		// retrace by the amount specified in endstop_adj
+		if (endstop_adj[axis] * axis_home_dir < 0) {
+		  #if ENABLED(DEBUG_LEVELING_FEATURE)
+			if (marlin_debug_flags & DEBUG_LEVELING) {
+			  SERIAL_ECHOLNPGM("> enable_endstops(false)");
+			}
+		  #endif
+		  enable_endstops(false); // Disable endstops while moving away
+		  sync_plan_position();
+		  destination[axis] = endstop_adj[axis];
+		  #if ENABLED(DEBUG_LEVELING_FEATURE)
+			if (marlin_debug_flags & DEBUG_LEVELING) {
+			  SERIAL_ECHOPAIR("> endstop_adj = ", endstop_adj[axis]);
+			  print_xyz(" > destination", destination);
+			}
+		  #endif
+		  line_to_destination();
+		  st_synchronize();
+		  #if ENABLED(DEBUG_LEVELING_FEATURE)
+			if (marlin_debug_flags & DEBUG_LEVELING) {
+			  SERIAL_ECHOLNPGM("> enable_endstops(true)");
+			}
+		  #endif
+		  enable_endstops(true); // Enable endstops for next homing move
+		}
+		#if ENABLED(DEBUG_LEVELING_FEATURE)
+		  else {
+			if (marlin_debug_flags & DEBUG_LEVELING) {
+			  SERIAL_ECHOPAIR("> endstop_adj * axis_home_dir = ", endstop_adj[axis] * axis_home_dir);
+			  SERIAL_EOL;
+			}
+		  }
+		#endif
+	  #endif
+
+	  // Set the axis position to its home position (plus home offsets)
+	  set_axis_is_at_home(axis);
+	  sync_plan_position();
+
+	  #if ENABLED(DEBUG_LEVELING_FEATURE)
+		if (marlin_debug_flags & DEBUG_LEVELING) {
+		  print_xyz("> AFTER set_axis_is_at_home > current_position", current_position);
+		}
+	  #endif
+
+	  destination[axis] = current_position[axis];
+	  feedrate = 0.0;
+	  endstops_hit_on_purpose(); // clear endstop hit flags
+	  axis_known_position[axis] = true;
+
+	  #if ENABLED(Z_PROBE_SLED)
+		// bring Z probe back
+		if (axis == Z_AXIS) {
+		  if (axis_home_dir < 0) dock_sled(true);
+		}
+	  #endif
+
+	  #if SERVO_LEVELING && DISABLED(Z_PROBE_SLED)
+
+		// Deploy a Z probe if there is one, and homing towards the bed
+		if (axis == Z_AXIS) {
+		  if (axis_home_dir < 0) {
+			#if ENABLED(DEBUG_LEVELING_FEATURE)
+			  if (marlin_debug_flags & DEBUG_LEVELING) {
+				SERIAL_ECHOLNPGM("> SERVO_LEVELING > stow_z_probe");
+			  }
+			#endif
+			stow_z_probe();
+		  }
+		}
+		else
+
+	  #endif
+
+	  {
+		#if HAS_SERVO_ENDSTOPS
+		  // Retract Servo endstop if enabled
+		  if (servo_endstop_id[axis] >= 0) {
+			#if ENABLED(DEBUG_LEVELING_FEATURE)
+			  if (marlin_debug_flags & DEBUG_LEVELING) {
+				SERIAL_ECHOLNPGM("> SERVO_ENDSTOPS > Stow with servo.move()");
+			  }
+			#endif
+			servo[servo_endstop_id[axis]].move(servo_endstop_angle[axis][1]);
+		  }
+		#endif
+	  }
+
+	}
+
+	#if ENABLED(DEBUG_LEVELING_FEATURE)
+	  if (marlin_debug_flags & DEBUG_LEVELING) {
+		SERIAL_ECHOPAIR("<<< homeaxis(", (unsigned long)axis);
+		SERIAL_CHAR(')');
+		SERIAL_EOL;
+	  }
+	#endif
+	
+  #endif //#if ENABLED(INCHWORM)
 }
 
 #if ENABLED(FWRETRACT)
@@ -3285,6 +3592,8 @@ inline void gcode_G92() {
   if (didXYZ) {
     #if ENABLED(DELTA) || ENABLED(SCARA)
       sync_plan_position_delta();
+	#elif ENABLED(INCHWORM)
+	  sync_plan_position_incworm();
     #else
       sync_plan_position();
     #endif
@@ -6333,6 +6642,37 @@ void clamp_to_software_endstops(float target[3]) {
   }
 }
 
+// ------- INCHWORM non-linear transformation ----------------
+#if ENABLED(INCHWORM)
+void calculate_inchworm(float cartesian[3]) {
+	float yreverse = inchworm_l - cartesian[Y_AXIS] - min_pos[Y_AXIS];  //
+	float xdiff = sqrt( inchworm_lsq - sq( yreverse ) ) + inchworm_dh;
+	iw_delta[X_AXIS] = cartesian[X_AXIS] - xdiff;
+	iw_delta[Y_AXIS] = cartesian[X_AXIS] + xdiff;
+	iw_delta[Z_AXIS] = cartesian[Z_AXIS];
+}
+
+void calculate_inchworm_forward(float f_iw[3]) {
+	// calculate forward kinematics and place result in iw_delta[].
+	//
+	
+	// first some sanity checks.
+	if( f_iw[Y_AXIS] < f_iw[X_AXIS] ) {
+		// error. this should never happen.
+		// halt the machine.
+		// return;
+	}
+	
+	iw_delta[X_AXIS] = ( f_iw[A_AXIS] + f_iw[B_AXIS] ) / 2;               // X-position is mid between A and B.
+	float xdiff_half = ( f_iw[B_AXIS] - f_iw[A_AXIS] - inchworm_d) / 2;   // B-Axis > A-Axis. Remove D.
+	iw_delta[Y_AXIS] = inchworm_l - sqrt( inchworm_lsq - sq( xdiff_half ) ) + min_pos[Y_AXIS];         // Y-position. reverse pythagoras.
+	iw_delta[Z_AXIS] = f_iw[Z_AXIS];                                    // Z-position is cartesian.
+}
+#endif
+
+
+
+
 #if ENABLED(DELTA)
 
   void recalc_delta_settings(float radius, float diagonal_rod) {
@@ -6562,6 +6902,35 @@ void mesh_plan_buffer_line(float x, float y, float z, const float e, float feed_
   inline bool prepare_move_scara(float target[NUM_AXIS]) { return prepare_move_delta(target); }
 #endif
 
+#if ENABLED(INCHWORM)
+  inline bool prepare_move_inchworm(float target[NUM_AXIS]) {
+	  float difference[NUM_AXIS];
+	  for (int8_t i=0; i < NUM_AXIS; i++) difference[i] = target[i] - current_position[i];
+
+	  float cartesian_mm = sqrt(sq(difference[X_AXIS]) + sq(difference[Y_AXIS]) + sq(difference[Z_AXIS]));
+	  if (cartesian_mm < 0.000001) cartesian_mm = abs(difference[E_AXIS]);
+	  if (cartesian_mm < 0.000001) return false;
+	  float seconds = 6000 * cartesian_mm / feedrate / feedrate_multiplier;
+	  int steps = max(1, int(iw_segments_per_second * seconds));
+
+	  SERIAL_ECHOLNPGM("---- inline bool prepare_move_inchworm(float target[NUM_AXIS])");
+	  SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
+	  SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
+	  SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
+	  for (int s = 1; s <= steps; s++) {
+
+		  float fraction = float(s) / float(steps);
+
+		  for (int8_t i = 0; i < NUM_AXIS; i++)
+		  target[i] = current_position[i] + difference[i] * fraction;
+
+		  calculate_inchworm(target);
+		  plan_buffer_line(iw_delta[X_AXIS], iw_delta[Y_AXIS], iw_delta[Z_AXIS], target[E_AXIS], feedrate/60*feedrate_multiplier/100.0, active_extruder);
+	  }
+	  return true;
+  }
+#endif  // #if ENABLED(INCHWORM)
+
 #if ENABLED(DUAL_X_CARRIAGE)
 
   inline bool prepare_move_dual_x_carriage() {
@@ -6639,6 +7008,8 @@ void prepare_move() {
     if (!prepare_move_scara(destination)) return;
   #elif ENABLED(DELTA)
     if (!prepare_move_delta(destination)) return;
+  #elif ENABLED(INCHWORM)
+    if (!prepare_move_inchworm(destination)) return;
   #endif
 
   #if ENABLED(DUAL_X_CARRIAGE)

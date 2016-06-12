@@ -253,6 +253,30 @@ extern float min_pos[3]; // axis[n].min_pos
 extern float max_pos[3]; // axis[n].max_pos
 extern bool axis_known_position[3]; // axis[n].is_known
 
+//===========================================================================
+//========================== NEW: INCHWORM kinematics =======================
+//===========================================================================
+#if ENABLED(INCHWORM)
+	void calculate_inchworm(float cartesian[3]);
+	void calculate_inchworm_forward(float f_iw[3]);
+	extern float iw_delta[3];
+	extern float inchworm_l;
+	extern float inchworm_lsq;
+	extern float inchworm_d;
+	extern float inchworm_dh;
+	extern float iw_segments_per_second;
+	extern float inchworm_max_step;
+	
+	
+	// ---------------------------------
+	// dirty fix to some initialization problems on the inchworm. 
+	void sync_plan_position();
+	void set_current_to_destination();
+	void set_destination_to_current();
+	// ---------------------------------
+
+#endif
+
 #if ENABLED(DELTA)
   extern float delta[3];
   extern float endstop_adj[3]; // axis[n].endstop_adj

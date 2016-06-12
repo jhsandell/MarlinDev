@@ -237,6 +237,52 @@
 #endif
 
 /**
+ * INCHWORM kinematics are experimental and most features are not supported.
+ */
+#if ENABLED(INCHWORM)
+
+//--- compiler errors --------------
+  #if ENABLED(AUTO_BED_LEVELING_FEATURE)
+    #error The AUTO_BED_LEVELING_FEATURE is not supported with INCHWORM.
+  #endif
+
+  #if ENABLED(MANUAL_BED_LEVELING)
+    #error The MANUAL_BED_LEVELING is not supported with INCHWORM.
+  #endif
+
+  #if ENABLED(MESH_BED_LEVELING)
+    #error The MESH_BED_LEVELING is not supported with INCHWORM.
+  #endif
+
+  #if ENABLED(MANUAL_HOME_POSITIONS)
+    #error The MANUAL_HOME_POSITIONS is not supported with INCHWORM.
+  #endif
+
+  #if ENABLED(DUAL_X_CARRIAGE)
+    #error The DUAL_X_CARRIAGE is not supported with INCHWORM.
+  #endif
+
+  #if ENABLED(QUICK_HOME) || ENABLED(HOME_Y_BEFORE_X)
+  #error The QUICK_HOME and HOME_Y_BEFORE_X are not supported with INCHWORM.
+  #endif
+  
+  #if ENABLED(FWRETRACT) 
+	#error The FWRETRACT is not supported with INCHWORM.
+  #endif
+  
+  #if EXTRUDERS > 1
+    #error The INCHWORM supports currently only one extruder.
+	#error The G-command to switch tool (Txx) is not tested.
+  #endif
+
+//--- warnings --------------
+  #if ENABLED(BABYSTEPPING) || ENABLED(ADVANCE)
+    #warning The BABYSTEPPING and ADVANCE features have not been tested with INCHWORM.
+  #endif
+
+#endif
+
+/**
  * Allen Key Z probe requires Auto Bed Leveling grid and Delta
  */
 #if ENABLED(Z_PROBE_ALLEN_KEY) && !(ENABLED(AUTO_BED_LEVELING_GRID) && ENABLED(DELTA))
